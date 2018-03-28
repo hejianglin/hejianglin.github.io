@@ -3,10 +3,9 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 何江林的业余研究
+title: 业余研究院
 subtitle: Nothing good comes easy
-description:
-keywords:
+description: 
 author: hejianglin
 language: zh-CN
 timezone:
@@ -41,8 +40,9 @@ future: true
 highlight:
   enable: true
   line_number: true
-  auto_detect: false
+  auto_detect: true
   tab_replace:
+mathjax: true
   
 # Home page setting
 # path: Root path for your blogs index page. (default = '')
@@ -73,13 +73,13 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-#theme: landscape
-theme: cactus
+theme: maupassant
 theme_config:
 	colorscheme: white
-
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type:
+  type: git
+  repo: git@github.com:hejianglin/hejianglin.github.io.git
+  branch: master
