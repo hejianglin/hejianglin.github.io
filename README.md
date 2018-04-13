@@ -1,16 +1,28 @@
-## About the dependence
-### theme
+## hexo 
+## install
 ```
-git clone https://github.com/hejianglin/maupassant-hexo.git themes/maupassant
+npm install -g hexo-cli
 ```
 
-### hexo
+## plguins
 ```
 npm install hexo-deployer-git --save
+npm install hexo-wordcount --save
 ```
 
-### renderers
+[about hexo-plugins](https://hexo.io/plugins)
+
+## theme
+### install
 ```
-npm install hexo-renderer-pug --save
-npm install hexo-renderer-sass --save
+git clone https://github.com/hejianglin/hexo-theme-next.git themes/next
 ```
+
+### plugins
+- search
+```
+git clone https://github.com/theme-next/theme-next-algolia-instant-search themes/next/source/lib/algolia-instant-search
+```
+
+
+

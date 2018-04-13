@@ -3,11 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: masje
-subtitle: 何江林的业余研究
+title: 一只懒猫的业余研究
+subtitle: 
 description: 
 author: hejianglin
-language: zh-CN
+language: zh-Hans
 timezone:
 
 # URL
@@ -73,9 +73,11 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: maupassant
-theme_config:
-	colorscheme: white
+theme: next
+
+search:
+  path: search.xml
+  field: post
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
