@@ -7,7 +7,7 @@ title: 一只懒猫的业余研究
 subtitle: 
 description: 
 author: hejianglin
-language: zh-Hans
+language: zh-CN
 timezone:
 
 # URL
@@ -40,7 +40,7 @@ future: true
 highlight:
   enable: true
   line_number: true
-  auto_detect: true
+  auto_detect: false
   tab_replace:
 mathjax: true
   
@@ -78,6 +78,8 @@ theme: next
 search:
   path: search.xml
   field: post
+  format: html
+  limit: 10000
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
