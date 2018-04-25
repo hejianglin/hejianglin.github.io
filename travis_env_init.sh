@@ -28,7 +28,7 @@ echo "hexo and packages install complete."
 # Set git config ,need set variable before
 git config --global user.name "${GIT_USER_NAME}"
 git config --global user.email "${GIT_USER_EMAIL}"
-git clone https://github.com/hejianglin/hexo-theme-next.git themes/next
+#git clone https://github.com/hejianglin/hexo-theme-next.git themes/next
 sed -i'' "s~git@github.com:~https://${GIT_REPO_TOKEN}@github.com/~" _config.yml
 
 echo "Hexo environment pre install complete OK."

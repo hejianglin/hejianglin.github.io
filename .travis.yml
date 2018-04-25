@@ -8,6 +8,9 @@ branches: # 指定要构建的分支
   only: # only 表示只构建以下分支
   - hexo
 
+before_install:
+  - git clone https://github.com/hejianglin/hexo-theme-next.git themes/next
+  
 install: # 在安装项目环境阶段需要运行的命令，一条一行，类似的还有 before_install
   - source travis_env_init.sh # 指定 shell 脚本文件来做初始化
 
