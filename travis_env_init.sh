@@ -20,7 +20,6 @@ npm --version
 echo "Hexo environment pre install start."
 echo "${__COMMENTS__}"
 
-npm i -g gulp
 npm i -g hexo-cli
 npm i
 

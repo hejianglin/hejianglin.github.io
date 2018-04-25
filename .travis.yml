@@ -1,23 +1,23 @@
-language: node_js # Ö¸¶¨ÓïÑÔ»·¾³
+language: node_js # æŒ‡å®šè¯­è¨€ç¯å¢ƒ
 node_js:
-  - "6" # Ö¸¶¨ NodeJS °æ±¾
-dist: trusty # Ö¸¶¨ÏµÍ³°æ±¾¡£trusty ÊÇÖ¸ Ubuntu 14.04 ·¢ĞĞ°æµÄÃû³Æ
-sudo: required # ÊÇ·ñĞèÒª sudo È¨ÏŞ
+  - "6" # æŒ‡å®š NodeJS ç‰ˆæœ¬
+dist: trusty # æŒ‡å®šç³»ç»Ÿç‰ˆæœ¬ã€‚trusty æ˜¯æŒ‡ Ubuntu 14.04 å‘è¡Œç‰ˆçš„åç§°
+sudo: required # æ˜¯å¦éœ€è¦ sudo æƒé™
 
-branches: # Ö¸¶¨Òª¹¹½¨µÄ·ÖÖ§
-  only: # only ±íÊ¾Ö»¹¹½¨ÒÔÏÂ·ÖÖ§
+branches: # æŒ‡å®šè¦æ„å»ºçš„åˆ†æ”¯
+  only: # only è¡¨ç¤ºåªæ„å»ºä»¥ä¸‹åˆ†æ”¯
   - hexo
 
-install: # ÔÚ°²×°ÏîÄ¿»·¾³½×¶ÎĞèÒªÔËĞĞµÄÃüÁî£¬Ò»ÌõÒ»ĞĞ£¬ÀàËÆµÄ»¹ÓĞ before_install
-  - source travis_env_init.sh # Ö¸¶¨ shell ½Å±¾ÎÄ¼şÀ´×ö³õÊ¼»¯
+install: # åœ¨å®‰è£…é¡¹ç›®ç¯å¢ƒé˜¶æ®µéœ€è¦è¿è¡Œçš„å‘½ä»¤ï¼Œä¸€æ¡ä¸€è¡Œï¼Œç±»ä¼¼çš„è¿˜æœ‰ before_install
+  - source travis_env_init.sh # æŒ‡å®š shell è„šæœ¬æ–‡ä»¶æ¥åšåˆå§‹åŒ–
 
-script: # ÔÚ¹¹½¨½×¶ÎĞèÒªÔËĞĞµÄÃüÁî£¬Ò»ÌõÒ»ĞĞ£¬ÀàËÆµÄ»¹ÓĞ before_script¡¢after_script
+script: # åœ¨æ„å»ºé˜¶æ®µéœ€è¦è¿è¡Œçš„å‘½ä»¤ï¼Œä¸€æ¡ä¸€è¡Œï¼Œç±»ä¼¼çš„è¿˜æœ‰ before_scriptã€after_script
   - hexo clean 
-  - hexo generate # Hexo ³£¹æÃüÁî£¬Ö´ĞĞÇåÀíºÍÉú³É
+  - hexo generate # Hexo å¸¸è§„å‘½ä»¤ï¼Œæ‰§è¡Œæ¸…ç†å’Œç”Ÿæˆ
   - gulp
   
-after_success: # ÔÚ¹¹½¨³É¹¦ºóÒªÔËĞĞµÄÃüÁî£¬¹¹½¨Ê§°Ü²»»áÖ´ĞĞ£¬ÆäËûÍ¬ÉÏ
-  - hexo deploy > /dev/null # Í¨¹ı hexo µÄ deploy ÃüÁî²¿Êğ²©¿Í
+after_success: # åœ¨æ„å»ºæˆåŠŸåè¦è¿è¡Œçš„å‘½ä»¤ï¼Œæ„å»ºå¤±è´¥ä¸ä¼šæ‰§è¡Œï¼Œå…¶ä»–åŒä¸Š
+  - hexo deploy > /dev/null # é€šè¿‡ hexo çš„ deploy å‘½ä»¤éƒ¨ç½²åšå®¢
 
-notifications: # ÉèÖÃÍ¨ÖªÏî
+notifications: # è®¾ç½®é€šçŸ¥é¡¹
   email: true
