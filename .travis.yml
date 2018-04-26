@@ -9,7 +9,7 @@ branches: # 指定要构建的分支
   - hexo
 
 before_install:
-  - git clone https://github.com/hejianglin/hexo-theme-next.git themes/next
+  - git clone https://github.com/theme-next/hexo-theme-next.git themes/next
   - rm themes/next/_config.yml
   - cp themes_config/next/_config.yml themes/next/_config.yml
   
