@@ -80,9 +80,14 @@ lexer.c: lexer.l //other-target 3 deplay
 - make lexer.o
 - make lexer.c
 
-实际上执行 ```make (count_words)```的时候 make 会根据 count_words所需要的依赖关系逐一的编译```make lexer.c make lexer.o make count_words.o```
-
-
+实际上执行 
+```
+make (count_words)
+```
+的时候 make 会根据 count_words所需要的依赖关系逐一的编译
+```
+make lexer.c make lexer.o make count_words.o
+```
 
 ## 假(PHONY)的工作目标
 
@@ -123,7 +128,11 @@ check_current_path_space:
 	df -k . | awk 'NR==2 {print $4}'
 ```
 
-为了多次使用```df -k . | awk 'NR==2 {print $4}```可以多添加一个中间层:
+为了多次使用
+```
+df -k . | awk 'NR==2 {print $4}
+```
+可以多添加一个中间层:
 
 ```
 .PHONY: check_current_path_space
@@ -168,7 +177,7 @@ make 在 makefile 中设定了几个自动变量
 | $?   | 所有必要条件的文件名(时间戳在上次更新之后的文件) |
 | $^   | 所有必要条件的文件名(去除重复的文件)       |
 | $+   | 所有必要条件的文件名(未去除重复的文件)      |
-| $*   | 工作目标的主文件名(后文介绍)           |
+| $i*   | 工作目标的主文件名(后文介绍)           |
 
 下面是一下相应的测试:
 
@@ -228,7 +237,7 @@ foo.o: src/foo.c include/foo.h
 make: *** No rule to make target `src/main.c', needed by `test'.  Stop.
 ```
 
-看样子 make 只会把 ```src/main.c```整个当成一个文件,因此此处引出了一个变量:
+看样子 make 只会把 "src/main.c" 整个当成一个文件,因此此处引出了一个变量:
 
 > VPATH : 告诉 make 到不同的目录去查找源文件
 
@@ -256,7 +265,7 @@ src/fun.c:1:10: fatal error: 'fun.h' file not found
 make: *** [fun.o] Error 1
 ```
 
-这大概是因为我们在```fun.c```中 include 了```fun.h```，为了解决这个问题编译器的 ```-I```选项可以帮助我们:
+这大概是因为我们在 "fun.c" 中 include 了 "fun.h" ，为了解决这个问题编译器的 "-I" 选项可以帮助我们:
 
 ```
 VPATH = src
@@ -279,7 +288,7 @@ clean:
 
 ### 缺点
 
-上面的 *.o 的头文件还是包含 include/\*.h
+上面的 "*.o" 的头文件还是包含 "include/*.h"
 
 虽然 VPATH 变量可以解决搜索问题,不过如果你设置了 VPATH,那么 **make 将会为它所需要的任何文件搜索 VPATH 列表中的每个目录,如果在多个目录中出现同名文件,那么 make 只会获取第一个被找到的文件**
 
@@ -431,7 +440,7 @@ gcc $(CPPFLAGS) $(INCLUDES) ...
 
 ## 静态库
 
-我们可以通过命令 ```ar```生成一个静态库, 关于 ar 可以查看 man,此处重点描述一下静态库在 makefile 中的更新
+我们可以通过命令 "ar" 生成一个静态库, 关于 ar 可以查看 man,此处重点描述一下静态库在 makefile 中的更新
 
 ### 生成
 
@@ -456,7 +465,7 @@ clean:
 
 .INTERMEDIATE 和 .PHONY 的类型一样,属于 makefile 中的特殊工作目标,它的作用是设定编译过程的中间文件,如果 make 在更新另一个工作目标期间创建了该文件,则该文件将在 make 运行结束时被自动删除,若在更新之前已存在则不删除.此处删除 fun.o 和 foo.o 文件,因为他们已经被打包到 libmyutil.a 中.
 
-可以看一下 make 的执行流程(使用```make --just-print```可 查看过程却不执行):
+可以看一下 make 的执行流程(使用 "make --just-print" 可 查看过程却不执行):
 
 ```
 cc  -I include  -c -o fun.o src/fun.c
@@ -515,4 +524,4 @@ rm foo.o
 
 > 每项规则的必要条件会依照他们被看到的顺序被一次附加到该工作目标的必要条件列表中
 
-为了解决循环引用的问题(应避免这个问题才是吧),需要引入: $? 的使用,关于\$?的使用可以查看上面关于变量的描述
+为了解决循环引用的问题(应避免这个问题才是吧),需要引入: "$?" 的使用,关于 "$?" 的使用可以查看上面关于变量的描述
