@@ -244,6 +244,7 @@ make: *** No rule to make target `src/main.c', needed by `test'.  Stop.
 上面的 makefile 利用 VPATH 修改成这样:
 
 ```
+VPATH = src
 test:  fun.o foo.o main.c
 	gcc -o $@ $^
 
@@ -411,14 +412,12 @@ clean:
 ### 修改规则变量的建议
 
 > CFLAGS: 编译选项的变量
->
 > CPPFLAGS: 预处理的变量
->
 > TARGET_ARCH:  结构 选项
 
 如果需要更新相应规则的变量值,建议使用**非系统默认**的变量名称,比如:
 
-在原 make 中存在 CPPFLAGS 变量为(可通过 ```make -p```查看):
+在原 make 中存在 CPPFLAGS 变量为(可通过 "make -p" 查看):
 
 ```
 CPPFLAGS = -I includes
