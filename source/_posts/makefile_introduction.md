@@ -1,5 +1,5 @@
 ---
-title: makefile(1)-入门
+title: makefile(1)入门
 date: 2018-05-12 09:12:11
 categories:  编译器(compiler)
 description : makefile 入门,介绍编写一个简单的makefile
