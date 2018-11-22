@@ -337,7 +337,7 @@ makefile:1: *** requires makefile version -..  Stop.
 
 #### $(foreach variable,list,body)
 
-
+==这个函数实在难以理解(用法...),跳过吧==
 
 
 
