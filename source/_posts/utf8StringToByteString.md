@@ -1,9 +1,9 @@
 ---
 title: UTF8字符编码转换为字节编码
-date: 2018-05-27 21:22:12
-categories: codec
+date: 2018-11-12
+categories: 编码
 description: UTF8字符编码转换为字节编码
-tags: codec
+tags: 编码
 ---
 
 在上周碰到一个比较坑爹(有可能也是我后知后觉了 - -' （大雾..)的问题,来看下下面的文件吧:  

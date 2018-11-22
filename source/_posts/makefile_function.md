@@ -1,9 +1,9 @@
 ---
-title:makefile(3)函数
-date: 2018-05-27 21:22:12
-categories:compiler
-description :介绍makefile中函数的使用
-tags :compiler
+title: makefile(3)函数
+date: 2018-05-27
+categories:  compiler
+description: 介绍makefile中函数的使用
+tags: compiler
 ---
 
 ## 前言 
