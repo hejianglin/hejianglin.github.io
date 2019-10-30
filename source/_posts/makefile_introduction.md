@@ -13,7 +13,7 @@ tags : compiler
 最近准备学习一下 Linux 驱动开发,发现自己对 makefile 已经忘的差不多了,索性花点时间重新学习一下,顺便记录一下,个人选择的书籍是:[GNU Make 项目管理](https://book.douban.com/subject/1845284/)
 
 
-
+<!--more-->
 ## make 和 makefile
 
 关于 make 和 makefile 的关系可以直接参考[这里](https://baike.baidu.com/item/make/17067703?fr=aladdin)

@@ -39,7 +39,7 @@ content_display_fixed: true
 random_posts: false
 
 widgets:
-- social
+#- social
 - post_content
 - category
 #- tagcloud

@@ -1,7 +1,7 @@
 ---
 title: 程序编译过程
 date: 2018-05-12 08:55:06
-categories:  编译器(compiler)
+categories:  compiler
 description : 程序编译过程介绍
 tags : compiler 
 ---
@@ -14,6 +14,8 @@ tags : compiler
 - 链接(linking)
 
 我们以最简单'hello,world'来进行讲述这几个过程
+
+<!--more-->
 
 ## 预处理
 
@@ -59,7 +61,7 @@ gcc -c hello.c -o hello.o
 
 ### 为什么需要链接
 
-讲述链接之前我们再研究一下为什么我们需要链接，下面是编译在编译源程序的具体工作流程: ![编译器处理编译的详细过程](http://oqnmphc00.bkt.clouddn.com/17-5-28/81164423.jpg)
+讲述链接之前我们再研究一下为什么我们需要链接，下面是编译在编译源程序的具体工作流程: ![编译器处理编译的详细过程](https://pic.superbed.cn/item/5db93135bd461d945a58a928.png)
 
 #### 1. 词法分析:
 
@@ -103,6 +105,6 @@ gcc -c hello.c -o hello.o
 **链接的最终目的是填各变量/函数的地址**
 下图所示就是链接在编译过程所在的位置:
 
-![链接](http://oqnmphc00.bkt.clouddn.com/17-5-29/97678619.jpg)
+![链接](https://pic.superbed.cn/item/5db93167bd461d945a58ac53.png)
 
 其中Library其实就是Runtime Library,也可以认为是一组目标文件的包

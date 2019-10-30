@@ -20,6 +20,8 @@ ESSID:" \xE8\xB7\xAF\xE8\xBE\xB9\xE3\x80\x82 lhwfacl\xE4\xBB\x8E5gu"
 ```
 已经是UTF8编码了，不过你尝试读取文件然后直接进行转码就会发现死活转不过来，为什么？  
 
+<!--more-->
+
 
 ## 字符和字节
 这2个其实区别很明显,但在这里却坑了我很久。使用[xxd](https://en.wikipedia.org/wiki/Hex_dump)看下上面这段字符的编码吧：  
