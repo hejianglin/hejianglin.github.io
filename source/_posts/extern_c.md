@@ -1,7 +1,7 @@
 ---
 title: extern "C"
 date: 2019-06-26 22:24:04
-categories:  基础
+categories:  C/C++
 description : extern "C" 的用意
 tags : C
 ---

@@ -1,7 +1,7 @@
 ---
 title: NFS共享设置
 date: 2018-04-13 09:42:04
-categories:  网络协议
+categories:  config
 description : Windows 和 Linux 的 NFS 共享设置
 tags : NFS
 ---
