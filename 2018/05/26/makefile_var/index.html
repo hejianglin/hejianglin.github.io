@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>makefile(2)变量和宏 | 一只懒猫的业余研究</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="介绍在makefile中使用变量和宏的各种方法">
+<meta name="keywords" content="compiler">
+<meta property="og:type" content="article">
+<meta property="og:title" content="makefile(2)变量和宏">
+<meta property="og:url" content="http://yoursite.com/2018/05/26/makefile_var/index.html">
+<meta property="og:site_name" content="一只懒猫的业余研究">
+<meta property="og:description" content="介绍在makefile中使用变量和宏的各种方法">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://oqnmphc00.bkt.clouddn.com/18-5-27/22941651.jpg">
+<meta property="og:updated_time" content="2019-10-30T15:04:14.171Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="makefile(2)变量和宏">
+<meta name="twitter:description" content="介绍在makefile中使用变量和宏的各种方法">
+<meta name="twitter:image" content="http://oqnmphc00.bkt.clouddn.com/18-5-27/22941651.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="一只懒猫的业余研究" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">关于</a>
+        
+      </nav>
+      
+    </div>
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">一只懒猫的业余研究</a>
+      </h1>
+      
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-makefile_var" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/05/26/makefile_var/" class="article-date">
+  <time datetime="2018-05-26T17:52:34.000Z" itemprop="datePublished">2018-05-26</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/compiler/">compiler</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      makefile(2)变量和宏
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>make 包含 2 种语言: 第一种用来描述工作目标和必要条件的依赖关系, 第二种是用来进行文字替换的宏语言</p>
+</blockquote>
+<p>我们在上一节已经见过第一种语言(规则)的用法了,其中我们也定义了类似于:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">VPATH = ...</span><br><span class="line">vpath = ...</span><br><span class="line">CPPFLAG = ..</span><br></pre></td></tr></table></figure>
+<p>等变量的值,本节主要介绍一下 makefile 中变量的用法.</p>
+<a id="more"></a>
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><p>变量的存在是为了最大程度的复用</p>
+<h3 id="创建变量"><a href="#创建变量" class="headerlink" title="创建变量"></a>创建变量</h3><p>变量的来源可以有:</p>
+<ul>
+<li><p>文件 </p>
+</li>
+<li><p>命令行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make CFLAG=-g ...</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>环境变量 (优先级低且降低移植性)</p>
+</li>
+<li><p>自动创建</p>
+</li>
+</ul>
+<h3 id="一些规则"><a href="#一些规则" class="headerlink" title="一些规则"></a>一些规则</h3><blockquote>
+<p>仅记录自己需要注意的规则</p>
+</blockquote>
+<ul>
+<li><p>变量名称区分大小写</p>
+</li>
+<li><p>可以使用 “$(CC)” 或者  “\${CC}” 的方式使用变量</p>
+</li>
+<li><p>一个变量的值由赋值符号右边已删除前导空格的所有字符组成,因此有一种情况需要注意:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">library = libutils.a #注意libutil.a后面多了一个空格</span><br></pre></td></tr></table></figure>
+<p>此时如果的变量”library”的值为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">libutils.a #同样包含这个空格</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="类型"><a href="#类型" class="headerlink" title="类型"></a>类型</h3><p>make 的变量有2种类型:</p>
+<ul>
+<li><p>简单扩展的变量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//使用 := 赋值运算符来定义</span><br><span class="line">MAKE_DEPEND := $(CC) -M</span><br></pre></td></tr></table></figure>
+<p>扩展的原则：</p>
+<blockquote>
+<p>一旦make从makefile读进该变量的定义语句,赋值运算符的右边部分会立刻被扩展,而扩展后的文本会被存储为该变量的值</p>
+</blockquote>
+<p><strong>注意: 如果需要拓展的内容为空,则相应的值被拓展后为<space>(空格)</space></strong></p>
+<p>比如,上面的额CC如果未定义,则遇到扩展后将变为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MAKE_DEPEND =  -M</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>递归扩展的变量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//使用 = 赋值运算符来定义</span><br><span class="line">MAKE_DEPEND = $(CC) -M</span><br></pre></td></tr></table></figure>
+<p>扩展的原则:</p>
+<blockquote>
+<p>扩展的动作会被延迟到该变量被使用的时候才进行</p>
+</blockquote>
+<p>比如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MAKE_DEPEND = $(CC) -M</span><br><span class="line">//第一次使用MAKE_DEPEND但是却没有的定义CC,则:</span><br><span class="line">MAKE_DEPEND = -M</span><br><span class="line">//定义 CC</span><br><span class="line">CC = gcc</span><br><span class="line">//第二次使用MAKE_DEPEND:</span><br><span class="line">MAKE_DEPEND = gcc -M</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="其他的赋值方式"><a href="#其他的赋值方式" class="headerlink" title="其他的赋值方式"></a>其他的赋值方式</h3><p>上面说使用了 := 来创建简单变量,使用 = 来创建递归变量,另外make还提供了 ?= 和 +=.</p>
+<h4 id="赋值方式"><a href="#赋值方式" class="headerlink" title="赋值方式 ?="></a>赋值方式 ?=</h4><blockquote>
+<p>？= 运算符成为附带条件的变量赋值运算符</p>
+</blockquote>
+<p>条件 ?  是什么条件 ? </p>
+<p>?= 用于首次定义,仅在变量的值不存在时对他进行赋值</p>
+<h4 id="赋值方式-1"><a href="#赋值方式-1" class="headerlink" title="赋值方式 +="></a>赋值方式 +=</h4><blockquote>
+<p>+= 附加运算符</p>
+</blockquote>
+<p>即附加相应的字符到变量</p>
+<h2 id="宏"><a href="#宏" class="headerlink" title="宏"></a>宏</h2><blockquote>
+<p>变量适合用来存储单行形式的值,可是对于多行形式值,比如脚本命令(函数),却表现得比较尴尬,因此宏就是来做这个事的</p>
+</blockquote>
+<p><strong>⚠️: 宏只是用来定义变量的另外一种方式</strong></p>
+<h3 id="创建宏"><a href="#创建宏" class="headerlink" title="创建宏"></a>创建宏</h3><p>在GNU make 中,可以通过define来创建宏(macro),比如,你可以这么使用:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">define update_dir</span><br><span class="line">	@echo update dir $@... #echo 前置的@不会输出echo命令,只会使用echo输出,更多的意义在后面学习</span><br><span class="line">	# do something</span><br><span class="line">endef #必须独自成一行</span><br></pre></td></tr></table></figure>
+<h3 id="使用宏"><a href="#使用宏" class="headerlink" title="使用宏"></a>使用宏</h3><p>宏的使用和变量并没有什么区别,比如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$(target) : $(condition1)  ...</span><br><span class="line">	$(update_dir) #对应上面创建的宏</span><br></pre></td></tr></table></figure>
+<p>比如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">BIN 	:= /usr/bin</span><br><span class="line">PRINTF 	:= $(BIN)/printf</span><br><span class="line">DF		:= /bin/df -h</span><br><span class="line">AWK 	:= $(BIN)/awk</span><br><span class="line"></span><br><span class="line">define _free_space</span><br><span class="line">	$(PRINTF) &quot;disk space statu:\n&quot;</span><br><span class="line">	$(DF) . | $(AWK) &apos;NR == 2 &#123;print $4&#125;&apos;</span><br><span class="line">endef</span><br><span class="line"></span><br><span class="line">.PHONY: free_space</span><br><span class="line">free_space:</span><br><span class="line">	@$(_free_space) #不输出执行的命令行,只输出结果</span><br></pre></td></tr></table></figure>
+<h2 id="目标专属变量"><a href="#目标专属变量" class="headerlink" title="目标专属变量"></a>目标专属变量</h2><p>为了为特定目标添加特定的变量,可以使用如下方式:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gui.o: CPPFLAG += -DUSE_NEW_MALLOC=1</span><br><span class="line">gui.o: gui.h</span><br><span class="line">	$(COMPILE.c) $(OUTPUT_OPTION) $&lt;</span><br></pre></td></tr></table></figure>
+<p>当编译完成 “gui.o” 后 CPPFLAG 将会恢复原来的值</p>
+<h2 id="条件指令"><a href="#条件指令" class="headerlink" title="条件指令"></a>条件指令</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>类似于 C  的 “#ifdef” ,在 make 中使用下面的方式定义:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ifdef COMSPEC #变量不需要使用$()等方式引用</span><br><span class="line">	PATH_SEP := ;</span><br><span class="line">	EXE_EXT := .exe</span><br><span class="line">else</span><br><span class="line">	PATH_SEP := :</span><br><span class="line">	EXE_EXT :=</span><br><span class="line">endif</span><br></pre></td></tr></table></figure>
+<p>恩,和 C 的 #ifdef 一模一样,更多条件可以是这样:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ifdef var</span><br><span class="line">ifndef var</span><br><span class="line">ifeq test</span><br><span class="line">ifneq test</span><br></pre></td></tr></table></figure>
+<p>其中 ifeq 和 ifneq 中的 test 可以采用下面的方式:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//1</span><br><span class="line">&quot;condition1&quot; &quot;codition2&quot;</span><br><span class="line">//2</span><br><span class="line">(condition1,condition2)</span><br></pre></td></tr></table></figure>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><blockquote>
+<p>条件处理指令可以用在宏定义和命令脚本中,还可以放在makefile的顶层</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">libGui.a: $(condition)</span><br><span class="line">	$(AR) $(ARFLAGS) $@ $&lt;</span><br><span class="line">	ifdef RANLIB</span><br><span class="line">		$(RANLIB) $@</span><br><span class="line">	endif</span><br></pre></td></tr></table></figure>
+<h2 id="include-指令"><a href="#include-指令" class="headerlink" title="include 指令"></a>include 指令</h2><p>可以包含自身,可能很有用? 下面是一个无限引用自身的写法:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.PHONY: dummy</span><br><span class="line">makefile: dummy</span><br><span class="line">	touch $@</span><br></pre></td></tr></table></figure>
+<h2 id="标准的make变量"><a href="#标准的make变量" class="headerlink" title="标准的make变量"></a>标准的make变量</h2><p>看图即可：</p>
+<p><img src="http://oqnmphc00.bkt.clouddn.com/18-5-27/22941651.jpg" alt="标准make变量"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/05/26/makefile_var/" data-id="ck2dexrhv000ai0ki3x29323q" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/compiler/">compiler</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+    
+<nav id="article-nav">
+  
+    <a href="/2018/05/27/makefile_function/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          makefile(3)函数
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/05/12/makefile_introduction/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">makefile(1)入门</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+ 
+     
+  <div class="comments" id="comments">
+    
+     
+       
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+       
+      
+      
+  </div>
+ 
+  
+
+</section>
+           
+    <aside id="sidebar">
+  
+    
+    <div class="widget-wrap">
+    
+      <div class="widget" id="toc-widget-fixed">
+      
+        <strong class="toc-title">文章目录</strong>
+        <div class="toc-widget-list">
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#变量"><span class="toc-number">2.</span> <span class="toc-text">变量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#创建变量"><span class="toc-number">2.1.</span> <span class="toc-text">创建变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#一些规则"><span class="toc-number">2.2.</span> <span class="toc-text">一些规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#类型"><span class="toc-number">2.3.</span> <span class="toc-text">类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他的赋值方式"><span class="toc-number">2.4.</span> <span class="toc-text">其他的赋值方式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#赋值方式"><span class="toc-number">2.4.1.</span> <span class="toc-text">赋值方式 ?=</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#赋值方式-1"><span class="toc-number">2.4.2.</span> <span class="toc-text">赋值方式 +=</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#宏"><span class="toc-number">3.</span> <span class="toc-text">宏</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#创建宏"><span class="toc-number">3.1.</span> <span class="toc-text">创建宏</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用宏"><span class="toc-number">3.2.</span> <span class="toc-text">使用宏</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#目标专属变量"><span class="toc-number">4.</span> <span class="toc-text">目标专属变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#条件指令"><span class="toc-number">5.</span> <span class="toc-text">条件指令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#定义"><span class="toc-number">5.1.</span> <span class="toc-text">定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用"><span class="toc-number">5.2.</span> <span class="toc-text">使用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#include-指令"><span class="toc-number">6.</span> <span class="toc-text">include 指令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#标准的make变量"><span class="toc-number">7.</span> <span class="toc-text">标准的make变量</span></a></li></ol>
+          </div>
+      </div>
+    </div>
+
+  
+    
+
+  
+    
+  
+    
+
+  
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-left">
+      &copy; 2014 - 2019 hejianglin&nbsp;|&nbsp;
+      主题 <a href="https://github.com/giscafer/hexo-theme-cafe/" target="_blank">Cafe</a>
+    </div>
+     <div id="footer-right">
+      联系方式&nbsp;|&nbsp;he.jianglin@foxmail.com
+    </div>
+  </div>
+</footer>
+ <script src="/jquery/jquery.min.js"></script>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">关于</a>
+  
+</nav>
+    <img class="back-to-top-btn" src="/images/fly-to-top.png"/>
+<script>
+// Elevator script included on the page, already.
+window.onload = function() {
+  var elevator = new Elevator({
+    selector:'.back-to-top-btn',
+    element: document.querySelector('.back-to-top-btn'),
+    duration: 1000 // milliseconds
+  });
+}
+</script>
+      
+
+  
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "e2fb4051c49842688ce669e634bc983f",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+    
+
+  
+
+
+
+
+
+
+
+<!-- author:forvoid begin -->
+<!-- author:forvoid begin -->
+
+<!-- author:forvoid end -->
+
+<!-- author:forvoid end -->
+
+
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      })
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      })
+    </script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/mathjax/MathJax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+ <script src="/js/is.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+<script src="/js/elevator.js"></script>
+  </div>
+</body>
+</html>

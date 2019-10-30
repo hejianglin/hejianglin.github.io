@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>makefile(1)入门 | 一只懒猫的业余研究</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="makefile 入门,介绍编写一个简单的makefile">
+<meta name="keywords" content="compiler">
+<meta property="og:type" content="article">
+<meta property="og:title" content="makefile(1)入门">
+<meta property="og:url" content="http://yoursite.com/2018/05/12/makefile_introduction/index.html">
+<meta property="og:site_name" content="一只懒猫的业余研究">
+<meta property="og:description" content="makefile 入门,介绍编写一个简单的makefile">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-10-30T15:04:14.171Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="makefile(1)入门">
+<meta name="twitter:description" content="makefile 入门,介绍编写一个简单的makefile">
+  
+    <link rel="alternate" href="/atom.xml" title="一只懒猫的业余研究" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">关于</a>
+        
+      </nav>
+      
+    </div>
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">一只懒猫的业余研究</a>
+      </h1>
+      
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-makefile_introduction" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/05/12/makefile_introduction/" class="article-date">
+  <time datetime="2018-05-12T09:12:11.000Z" itemprop="datePublished">2018-05-12</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/compiler/">compiler</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      makefile(1)入门
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近准备学习一下 Linux 驱动开发,发现自己对 makefile 已经忘的差不多了,索性花点时间重新学习一下,顺便记录一下,个人选择的书籍是:<a href="https://book.douban.com/subject/1845284/" target="_blank" rel="noopener">GNU Make 项目管理</a></p>
+<a id="more"></a>
+<h2 id="make-和-makefile"><a href="#make-和-makefile" class="headerlink" title="make 和 makefile"></a>make 和 makefile</h2><p>关于 make 和 makefile 的关系可以直接参考<a href="https://baike.baidu.com/item/make/17067703?fr=aladdin" target="_blank" rel="noopener">这里</a></p>
+<p>简言之: makefile 记录各个源代码之间关系及描述详细的编译过程,make 通过读取 makefile, 按照 makefile 描述编译过程进行自动化编译.</p>
+<p>问:那么 makefile 如何编写,make 又是怎么处理makefile的呢？</p>
+<p>答:makefile 包含了一组用来编译应用程序的规则,<strong>make 所看到的第一项规则会被视为默认规则</strong></p>
+<p>那么规则长什么样子?</p>
+<h2 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h2><p>一项规则可分为 3 个部分 : 1.target 2.prerequisite(前提条件) 3.command</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">target: prerequisite1  prerequisite2</span><br><span class="line">	commands</span><br></pre></td></tr></table></figure>
+<p>比如:</p>
+<h3 id="单个规则"><a href="#单个规则" class="headerlink" title="单个规则"></a>单个规则</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">//single-target-makefile</span><br><span class="line">hello : hello.c</span><br><span class="line">	gcc hello.c -o hello</span><br></pre></td></tr></table></figure>
+<p>此时执行 make 则采用 target 默认采用 hello</p>
+<h3 id="多个规则"><a href="#多个规则" class="headerlink" title="多个规则"></a>多个规则</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//multi-target-makefile</span><br><span class="line">count_words: count_words.o lexer.o -lfl //default target</span><br><span class="line">	gcc count_words.o lexer.o -lfl -o count_words</span><br><span class="line"></span><br><span class="line">count_words.o: count_words.c //other-tager 1</span><br><span class="line">	gcc -c count_words.c</span><br><span class="line">	</span><br><span class="line">lexer.o: lexer.c //other-target 2</span><br><span class="line">	gcc -c lexer.c</span><br><span class="line"></span><br><span class="line">lexer.c: lexer.l //other-target 3 deplay</span><br><span class="line">	flex -t lexer.l &gt; lexer.c</span><br></pre></td></tr></table></figure>
+<p>关于编译过程的几个步骤可以参考<a href="https://hejianglin.github.io/2018/05/12/compile_process/" target="_blank" rel="noopener">这里</a></p>
+<p>此时执行make可以有 4 种选项:</p>
+<ul>
+<li>make count_words (<strong>默认规则</strong>)</li>
+<li>make count_words.o</li>
+<li>make lexer.o</li>
+<li>make lexer.c</li>
+</ul>
+<p>实际上执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make (count_words)</span><br></pre></td></tr></table></figure></p>
+<p>的时候 make 会根据 count_words所需要的依赖关系逐一的编译<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make lexer.c make lexer.o make count_words.o</span><br></pre></td></tr></table></figure></p>
+<h2 id="假-PHONY-的工作目标"><a href="#假-PHONY-的工作目标" class="headerlink" title="假(PHONY)的工作目标"></a>假(PHONY)的工作目标</h2><h3 id="clear"><a href="#clear" class="headerlink" title="clear"></a>clear</h3><p>.PHONY 用来告诉make,该target不是一个真正的文件.一般用于clear比如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.PHONY: clear</span><br><span class="line">clear:</span><br><span class="line">	rm -rf *.o</span><br></pre></td></tr></table></figure>
+<p>原因: make 无法区分target 是不是一个真正的文件,比如此处的clear文件和clear命令</p>
+<h3 id="all"><a href="#all" class="headerlink" title="all"></a>all</h3><p>同样的应用可以见:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.PHONY: all</span><br><span class="line">all: target1 target2</span><br></pre></td></tr></table></figure>
+<p>如此便可以一次编译多个不相互依赖的target </p>
+<h3 id="多次使用"><a href="#多次使用" class="headerlink" title="多次使用"></a>多次使用</h3><p>在编写makefile的时候可能需要命令行的可移植性,比如下面</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.PHONY: check_current_path_space</span><br><span class="line">check_current_path_space:</span><br><span class="line">	df -k . | awk &apos;NR==2 &#123;print $4&#125;&apos;</span><br></pre></td></tr></table></figure>
+<p>为了多次使用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df -k . | awk &apos;NR==2 &#123;print $4&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以多添加一个中间层:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.PHONY: check_current_path_space</span><br><span class="line">check_current_path_space: df</span><br><span class="line"></span><br><span class="line">.PHONY: df</span><br><span class="line">df:</span><br><span class="line">	df -k . | awk &apos;NR==2 &#123;print $4&#125;&apos;</span><br></pre></td></tr></table></figure>
+<h3 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h3><p><strong>这一步看的不是很懂,设置为TODO吧</strong></p>
+<h3 id="空目标-empty-target"><a href="#空目标-empty-target" class="headerlink" title="空目标(empty target)"></a>空目标(empty target)</h3><p><strong>同样没看的明白,TODO</strong></p>
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><p>为了提高利用率,makefile 提供变量的使用,最简单的变量形式: </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(var)//等同于 $&#123;var&#125;</span><br></pre></td></tr></table></figure>
+<p>make 在 makefile 中设定了几个自动变量</p>
+<h3 id="make-设定的自动变量"><a href="#make-设定的自动变量" class="headerlink" title="make 设定的自动变量"></a>make 设定的自动变量</h3><table>
+<thead>
+<tr>
+<th>变量</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$@</td>
+<td>工作目标的文件名</td>
+</tr>
+<tr>
+<td>$%</td>
+<td>Archive member结构中的文件名</td>
+</tr>
+<tr>
+<td>$&lt;</td>
+<td>第一个必要条件的文件名</td>
+</tr>
+<tr>
+<td>$?</td>
+<td>所有必要条件的文件名(时间戳在上次更新之后的文件)</td>
+</tr>
+<tr>
+<td>$^</td>
+<td>所有必要条件的文件名(去除重复的文件)</td>
+</tr>
+<tr>
+<td>$+</td>
+<td>所有必要条件的文件名(未去除重复的文件)</td>
+</tr>
+<tr>
+<td>$i*</td>
+<td>工作目标的主文件名(后文介绍)</td>
+</tr>
+</tbody>
+</table>
+<p>下面是一下相应的测试:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#$&lt; 第一个必要条件的文件名</span><br><span class="line">hello: hello.c</span><br><span class="line">	gcc -o $@ $&lt;</span><br><span class="line">#$? 和 $^</span><br><span class="line">sum: sum.c sum_fun.o</span><br><span class="line">	gcc -o $@ $^ # $?</span><br><span class="line"></span><br><span class="line">sum_fun.o: sum_fun.c</span><br><span class="line">	gcc -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm hello</span><br><span class="line"></span><br><span class="line">.PHONY: clean_sum</span><br><span class="line">clean_sum:</span><br><span class="line">	rm sum sum_fun.o</span><br></pre></td></tr></table></figure>
+<h2 id="多级目录"><a href="#多级目录" class="headerlink" title="多级目录"></a>多级目录</h2><p>平时我们遇到的 make 更多的情况可能是这种目录结构:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">├── include</span><br><span class="line">│   ├── foo.h</span><br><span class="line">│   └── fun.h</span><br><span class="line">├── makefile</span><br><span class="line">└── src</span><br><span class="line">    ├── foo.c</span><br><span class="line">    ├── fun.c</span><br><span class="line">    └── main.cpp</span><br></pre></td></tr></table></figure>
+<p>结合前面的学习,我们可能会写出这样的 makefile:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">test: src/main.c fun.o foo.o</span><br><span class="line">	gcc -o $@ $^</span><br><span class="line"></span><br><span class="line">fun.o: src/fun.c include/fun.h</span><br><span class="line">	gcc -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">foo.o: src/foo.c include/foo.h </span><br><span class="line">	gcc -c $&lt; -o $@</span><br></pre></td></tr></table></figure>
+<p>不过这样的编译结果是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make: *** No rule to make target `src/main.c&apos;, needed by `test&apos;.  Stop.</span><br></pre></td></tr></table></figure>
+<p>看样子 make 只会把 “src/main.c” 整个当成一个文件,因此此处引出了一个变量:</p>
+<blockquote>
+<p>VPATH : 告诉 make 到不同的目录去查找源文件</p>
+</blockquote>
+<p>上面的 makefile 利用 VPATH 修改成这样:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">VPATH = src</span><br><span class="line">test:  fun.o foo.o main.c</span><br><span class="line">	gcc -o $@ $^</span><br><span class="line"></span><br><span class="line">fun.o: fun.c include/fun.h</span><br><span class="line">	gcc -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">foo.o: foo.c include/foo.h</span><br><span class="line">	gcc -c $&lt; -o $@</span><br></pre></td></tr></table></figure>
+<p>然而这回确是找不到 include 的了:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">gcc -c src/fun.c -o fun.o</span><br><span class="line">src/fun.c:1:10: fatal error: &apos;fun.h&apos; file not found</span><br><span class="line">#include &quot;fun.h&quot;</span><br><span class="line">         ^~~~~~~</span><br><span class="line">1 error generated.</span><br><span class="line">make: *** [fun.o] Error 1</span><br></pre></td></tr></table></figure>
+<p>这大概是因为我们在 “fun.c” 中 include 了 “fun.h” ，为了解决这个问题编译器的 “-I” 选项可以帮助我们:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">VPATH = src</span><br><span class="line">CPPFLAGS = -I include</span><br><span class="line">test:  fun.o foo.o main.c</span><br><span class="line">	gcc $(CPPFLAGS) -o $@ $^</span><br><span class="line"></span><br><span class="line">fun.o: fun.c include/fun.h</span><br><span class="line">	gcc $(CPPFLAGS) -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">foo.o: foo.c include/foo.h</span><br><span class="line">	gcc $(CPPFLAGS) -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm fun.o foo.o test</span><br></pre></td></tr></table></figure>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><p>上面的 “<em>.o” 的头文件还是包含 “include/</em>.h”</p>
+<p>虽然 VPATH 变量可以解决搜索问题,不过如果你设置了 VPATH,那么 <strong>make 将会为它所需要的任何文件搜索 VPATH 列表中的每个目录,如果在多个目录中出现同名文件,那么 make 只会获取第一个被找到的文件</strong></p>
+<h3 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h3><p>使用 vpath ,这个指令的语法:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vpath pattern directory-list</span><br></pre></td></tr></table></figure>
+<p>上面的例子的 makefile 可以修改为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">vpath %.c src</span><br><span class="line">vpath %.h include</span><br><span class="line"></span><br><span class="line">CPPFLAGS = -I include</span><br><span class="line"></span><br><span class="line">test:  fun.o foo.o main.c</span><br><span class="line">	gcc $(CPPFLAGS) -o $@ $^</span><br><span class="line"></span><br><span class="line">fun.o: fun.c fun.h</span><br><span class="line">	gcc $(CPPFLAGS) -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">foo.o: foo.c foo.h</span><br><span class="line">	gcc $(CPPFLAGS) -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm fun.o foo.o test</span><br></pre></td></tr></table></figure>
+<h2 id="内置规则"><a href="#内置规则" class="headerlink" title="内置规则"></a>内置规则</h2><p>为了简化 makefile 的编写工作, make 内置了许多模式规则而内置规则(built-in rule)是模式规则(pattern rule)的实例。若要查看make 的内置规则可以通过</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make --print-data-base</span><br></pre></td></tr></table></figure>
+<p>查看,在我的环境下可以看到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"># Implicit Rules</span><br><span class="line"></span><br><span class="line">%.out:</span><br><span class="line"></span><br><span class="line">%.a:</span><br><span class="line"></span><br><span class="line">%.ln:</span><br><span class="line"></span><br><span class="line">%.o:</span><br><span class="line"></span><br><span class="line">%: %.o</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@</span><br><span class="line"></span><br><span class="line">%.c:</span><br><span class="line"></span><br><span class="line">%: %.c</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(LINK.c) $^ $(LOADLIBES) $(LDLIBS) -o $@</span><br><span class="line"></span><br><span class="line">%.ln: %.c</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(LINT.c) -C$* $&lt;</span><br><span class="line"></span><br><span class="line">%.o: %.c</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(COMPILE.c) $(OUTPUT_OPTION) $&lt;</span><br><span class="line"></span><br><span class="line">%.cc:</span><br><span class="line"></span><br><span class="line">%: %.cc</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@</span><br><span class="line"></span><br><span class="line">%.o: %.cc</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(COMPILE.cc) $(OUTPUT_OPTION) $&lt;</span><br><span class="line"></span><br><span class="line">%.C:</span><br><span class="line"></span><br><span class="line">%: %.C</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(LINK.C) $^ $(LOADLIBES) $(LDLIBS) -o $@</span><br><span class="line"></span><br><span class="line">%.o: %.C</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(COMPILE.C) $(OUTPUT_OPTION) $&lt;</span><br><span class="line"></span><br><span class="line">//...</span><br></pre></td></tr></table></figure>
+<p>根据上面的描述,再来精简一下原来的makefile:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">vpath %.c src</span><br><span class="line">vpath %.h include</span><br><span class="line"></span><br><span class="line">CPPFLAGS = -I include</span><br><span class="line"></span><br><span class="line">test:  fun.o foo.o main.c</span><br><span class="line">	gcc $(CPPFLAGS) -o $@ $^ #因为包含%.o 与 %.c 的结合,因此只能自己编写编译规则</span><br><span class="line">fun.o: fun.c fun.h</span><br><span class="line">foo.o: foo.c foo.h</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm fun.o foo.o test</span><br></pre></td></tr></table></figure>
+<h3 id="修改规则变量的建议"><a href="#修改规则变量的建议" class="headerlink" title="修改规则变量的建议"></a>修改规则变量的建议</h3><blockquote>
+<p>CFLAGS: 编译选项的变量<br>CPPFLAGS: 预处理的变量<br>TARGET_ARCH:  结构 选项</p>
+</blockquote>
+<p>如果需要更新相应规则的变量值,建议使用<strong>非系统默认</strong>的变量名称,比如:</p>
+<p>在原 make 中存在 CPPFLAGS 变量为(可通过 “make -p” 查看):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CPPFLAGS = -I includes</span><br></pre></td></tr></table></figure>
+<p>而此时你需要在添加一个搜索头文件的目录,<strong>建议这么修改:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INCLUDES = -I your_includes</span><br></pre></td></tr></table></figure>
+<p>然后在相应 makefile 中这么写:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc $(CPPFLAGS) $(INCLUDES) ...</span><br></pre></td></tr></table></figure>
+<h2 id="静态库"><a href="#静态库" class="headerlink" title="静态库"></a>静态库</h2><p>我们可以通过命令 “ar” 生成一个静态库, 关于 ar 可以查看 man,此处重点描述一下静态库在 makefile 中的更新</p>
+<h3 id="生成"><a href="#生成" class="headerlink" title="生成"></a>生成</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">vpath %.c src</span><br><span class="line">vpath %.h include</span><br><span class="line"></span><br><span class="line">CPPFLAGS = -I include</span><br><span class="line"></span><br><span class="line">test:  main.c libmyutil.a</span><br><span class="line">	gcc $(CPPFLAGS) -o $@ $^</span><br><span class="line"></span><br><span class="line">libmyutil.a: fun.o foo.o</span><br><span class="line">	ar rv libmyutil.a $^</span><br><span class="line"></span><br><span class="line">.INTERMEDIATE: fun.o foo.o</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm test libmyutil.a</span><br></pre></td></tr></table></figure>
+<p>.INTERMEDIATE 和 .PHONY 的类型一样,属于 makefile 中的特殊工作目标,它的作用是设定编译过程的中间文件,如果 make 在更新另一个工作目标期间创建了该文件,则该文件将在 make 运行结束时被自动删除,若在更新之前已存在则不删除.此处删除 fun.o 和 foo.o 文件,因为他们已经被打包到 libmyutil.a 中.</p>
+<p>可以看一下 make 的执行流程(使用 “make –just-print” 可 查看过程却不执行):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cc  -I include  -c -o fun.o src/fun.c</span><br><span class="line">cc  -I include  -c -o foo.o src/foo.c</span><br><span class="line">ar rv libmyutil.a fun.o foo.o</span><br><span class="line">gcc -I include -o test src/main.c libmyutil.a</span><br><span class="line">rm fun.o foo.o</span><br></pre></td></tr></table></figure>
+<h3 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h3><p>按照上面的 makefile,此时如果 foo.c 或者 fun.c <strong>其中一个</strong>发生了改变,那 make 都会尝试重新编译他们,怎样做到只编译更新是此处要解决的问题.</p>
+<h4 id="library-o"><a href="#library-o" class="headerlink" title="library(%.o)"></a>library(%.o)</h4><p>对需要打包的模块进行分别描述可以解决上面那个问题,比如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">vpath %.c src</span><br><span class="line">vpath %.h include</span><br><span class="line"></span><br><span class="line">CPPFLAGS = -I include</span><br><span class="line"></span><br><span class="line">test:  main.c libmyutil.a</span><br><span class="line">	gcc $(CPPFLAGS) -o $@ $^</span><br><span class="line"></span><br><span class="line">libmyutil.a: libmyutil.a(fun.o) libmyutil.a(foo.o)</span><br><span class="line">	ar rv libmyutil.a $?</span><br><span class="line"></span><br><span class="line">.INTERMEDIATE: fun.o foo.o</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm test libmyutil.a</span><br></pre></td></tr></table></figure>
+<p>如果只是更新了 foo.c 则编译过程可能如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cc  -I include  -c -o foo.o src/foo.c</span><br><span class="line">ar rv libmyutil.a foo.o</span><br><span class="line">r - foo.o</span><br><span class="line">ar rv libmyutil.a foo.o</span><br><span class="line">r - foo.o</span><br><span class="line">gcc -I include -o test src/main.c libmyutil.a</span><br><span class="line">rm foo.o</span><br></pre></td></tr></table></figure>
+<h3 id="链接顺序"><a href="#链接顺序" class="headerlink" title="链接顺序"></a>链接顺序</h3><blockquote>
+<p>每项规则的必要条件会依照他们被看到的顺序被一次附加到该工作目标的必要条件列表中</p>
+</blockquote>
+<p>为了解决循环引用的问题(应避免这个问题才是吧),需要引入: “$?” 的使用,关于 “$?” 的使用可以查看上面关于变量的描述</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/05/12/makefile_introduction/" data-id="ck2dexrhr0009i0kig6rt87dq" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/compiler/">compiler</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+    
+<nav id="article-nav">
+  
+    <a href="/2018/05/26/makefile_var/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          makefile(2)变量和宏
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/05/12/compile_process/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">程序编译过程</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+ 
+     
+  <div class="comments" id="comments">
+    
+     
+       
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+       
+      
+      
+  </div>
+ 
+  
+
+</section>
+           
+    <aside id="sidebar">
+  
+    
+    <div class="widget-wrap">
+    
+      <div class="widget" id="toc-widget-fixed">
+      
+        <strong class="toc-title">文章目录</strong>
+        <div class="toc-widget-list">
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#make-和-makefile"><span class="toc-number">2.</span> <span class="toc-text">make 和 makefile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#规则"><span class="toc-number">3.</span> <span class="toc-text">规则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#单个规则"><span class="toc-number">3.1.</span> <span class="toc-text">单个规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多个规则"><span class="toc-number">3.2.</span> <span class="toc-text">多个规则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#假-PHONY-的工作目标"><span class="toc-number">4.</span> <span class="toc-text">假(PHONY)的工作目标</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#clear"><span class="toc-number">4.1.</span> <span class="toc-text">clear</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#all"><span class="toc-number">4.2.</span> <span class="toc-text">all</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多次使用"><span class="toc-number">4.3.</span> <span class="toc-text">多次使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#说明"><span class="toc-number">4.4.</span> <span class="toc-text">说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#空目标-empty-target"><span class="toc-number">4.5.</span> <span class="toc-text">空目标(empty target)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#变量"><span class="toc-number">5.</span> <span class="toc-text">变量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#make-设定的自动变量"><span class="toc-number">5.1.</span> <span class="toc-text">make 设定的自动变量</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多级目录"><span class="toc-number">6.</span> <span class="toc-text">多级目录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#缺点"><span class="toc-number">6.1.</span> <span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决"><span class="toc-number">6.2.</span> <span class="toc-text">解决</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#内置规则"><span class="toc-number">7.</span> <span class="toc-text">内置规则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#修改规则变量的建议"><span class="toc-number">7.1.</span> <span class="toc-text">修改规则变量的建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#静态库"><span class="toc-number">8.</span> <span class="toc-text">静态库</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#生成"><span class="toc-number">8.1.</span> <span class="toc-text">生成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#更新"><span class="toc-number">8.2.</span> <span class="toc-text">更新</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#library-o"><span class="toc-number">8.2.1.</span> <span class="toc-text">library(%.o)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#链接顺序"><span class="toc-number">8.3.</span> <span class="toc-text">链接顺序</span></a></li></ol></li></ol>
+          </div>
+      </div>
+    </div>
+
+  
+    
+
+  
+    
+  
+    
+
+  
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-left">
+      &copy; 2014 - 2019 hejianglin&nbsp;|&nbsp;
+      主题 <a href="https://github.com/giscafer/hexo-theme-cafe/" target="_blank">Cafe</a>
+    </div>
+     <div id="footer-right">
+      联系方式&nbsp;|&nbsp;he.jianglin@foxmail.com
+    </div>
+  </div>
+</footer>
+ <script src="/jquery/jquery.min.js"></script>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">关于</a>
+  
+</nav>
+    <img class="back-to-top-btn" src="/images/fly-to-top.png"/>
+<script>
+// Elevator script included on the page, already.
+window.onload = function() {
+  var elevator = new Elevator({
+    selector:'.back-to-top-btn',
+    element: document.querySelector('.back-to-top-btn'),
+    duration: 1000 // milliseconds
+  });
+}
+</script>
+      
+
+  
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "e2fb4051c49842688ce669e634bc983f",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+    
+
+  
+
+
+
+
+
+
+
+<!-- author:forvoid begin -->
+<!-- author:forvoid begin -->
+
+<!-- author:forvoid end -->
+
+<!-- author:forvoid end -->
+
+
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      })
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      })
+    </script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/mathjax/MathJax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+ <script src="/js/is.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+<script src="/js/elevator.js"></script>
+  </div>
+</body>
+</html>

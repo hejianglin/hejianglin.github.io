@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <title>程序编译过程 | 一只懒猫的业余研究</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="程序编译过程介绍">
+<meta name="keywords" content="compiler">
+<meta property="og:type" content="article">
+<meta property="og:title" content="程序编译过程">
+<meta property="og:url" content="http://yoursite.com/2018/05/12/compile_process/index.html">
+<meta property="og:site_name" content="一只懒猫的业余研究">
+<meta property="og:description" content="程序编译过程介绍">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://pic.superbed.cn/item/5db93135bd461d945a58a928.png">
+<meta property="og:image" content="https://pic.superbed.cn/item/5db93167bd461d945a58ac53.png">
+<meta property="og:updated_time" content="2019-10-30T15:04:14.171Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="程序编译过程">
+<meta name="twitter:description" content="程序编译过程介绍">
+<meta name="twitter:image" content="https://pic.superbed.cn/item/5db93135bd461d945a58a928.png">
+  
+    <link rel="alternate" href="/atom.xml" title="一只懒猫的业余研究" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">关于</a>
+        
+      </nav>
+      
+    </div>
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">一只懒猫的业余研究</a>
+      </h1>
+      
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-compile_process" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/05/12/compile_process/" class="article-date">
+  <time datetime="2018-05-12T08:55:06.000Z" itemprop="datePublished">2018-05-12</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/compiler/">compiler</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      程序编译过程
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- Table of Contents -->
+        
+        <p>我们都知道build的4个过程</p>
+<ul>
+<li>预处理(prepressing)</li>
+<li>编译(compilation)</li>
+<li>汇编(assembly)</li>
+<li>链接(linking)</li>
+</ul>
+<p>我们以最简单’hello,world’来进行讲述这几个过程</p>
+<a id="more"></a>
+<h2 id="预处理"><a href="#预处理" class="headerlink" title="预处理"></a>预处理</h2><p>通过编译器生成预编译完成的.i文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gcc -E hello.c hello.i</span><br></pre></td></tr></table></figure>
+<p>预处理最大的作用自然就是处理预编译指令,因此可以通过这样的方式看下我们的宏定义是否正确,其中:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># 55 &quot;/usr/include/sys/_types.h&quot; 3 4</span><br></pre></td></tr></table></figure>
+<p>用于编译器产生调试用的行号信息及产生编译错误或警告时显示行号,关于这一个，有待后续研究</p>
+<h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><p><strong>编译的最终结果是为了将源代码生成汇编代码</strong> 可以通过’-S’来生成,比如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -S hello.i -o hello.s</span><br></pre></td></tr></table></figure>
+<h2 id="汇编"><a href="#汇编" class="headerlink" title="汇编"></a>汇编</h2><p><strong>汇编的最终结果是为了将汇编代码生成机器代码</strong>可以通过as或者’-C’得到目标文件,比如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">as hello.s -o hello.o</span><br></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -c hello.c -o hello.o</span><br></pre></td></tr></table></figure>
+<p>查看.o文件可以使用命令xxd</p>
+<h2 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h2><h3 id="为什么需要链接"><a href="#为什么需要链接" class="headerlink" title="为什么需要链接"></a>为什么需要链接</h3><p>讲述链接之前我们再研究一下为什么我们需要链接，下面是编译在编译源程序的具体工作流程: <img src="https://pic.superbed.cn/item/5db93135bd461d945a58a928.png" alt="编译器处理编译的详细过程"></p>
+<h4 id="1-词法分析"><a href="#1-词法分析" class="headerlink" title="1. 词法分析:"></a>1. 词法分析:</h4><p>通过类似有限状态机(你可以认为是if..else…)将代码中的字符分解成它所能理解的最小片(tokens)</p>
+<p><strong>代表工具:lex</strong></p>
+<h4 id="2-语法分析"><a href="#2-语法分析" class="headerlink" title="2. 语法分析:"></a>2. 语法分析:</h4><p>将代码解析成语法树(syntax tree)</p>
+<blockquote>
+<p>分析时各逻辑/算术符号将按优先级进行解析</p>
+</blockquote>
+<p><strong>代表工具:yacc</strong></p>
+<h4 id="3-语义分析"><a href="#3-语义分析" class="headerlink" title="3. 语义分析"></a>3. 语义分析</h4><p>代码中存在的语义存在两种类型</p>
+<ul>
+<li>静态语义(static semantic):包括声明和类型的匹配</li>
+<li>动态语义(dynamic semantic):运行期间的错误</li>
+</ul>
+<p>编译器只能进行静态语义的分析</p>
+<h4 id="4-中间语言生成"><a href="#4-中间语言生成" class="headerlink" title="4. 中间语言生成"></a>4. 中间语言生成</h4><p>编译器优化(前端) + 生成目标机器代码(后端)<br>区分前后端的原因在于:不同平台的机器代码不同,但优化的前端代码是一致的</p>
+<blockquote>
+<p>注:中间语言的生成只是包含编译器优化的代码,生成机器代码是步骤5</p>
+</blockquote>
+<h4 id="5-目标代码的生成和优化"><a href="#5-目标代码的生成和优化" class="headerlink" title="5. 目标代码的生成和优化"></a>5. 目标代码的生成和优化</h4><h4 id="6-总结"><a href="#6-总结" class="headerlink" title="6. 总结"></a>6. 总结</h4><p>经历了这些步骤之后，我们编生成了源代码的目标码？然而回想一下你的源码，如果是单文件源码，那我们自然知道变量的地址，如果非单文件我们又是如何确定变量的地址的?<br>此时就需要链接了!!!</p>
+<h3 id="链接做了什么什么"><a href="#链接做了什么什么" class="headerlink" title="链接做了什么什么"></a>链接做了什么什么</h3><p><strong>链接的最终目的是填各变量/函数的地址</strong><br>下图所示就是链接在编译过程所在的位置:</p>
+<p><img src="https://pic.superbed.cn/item/5db93167bd461d945a58ac53.png" alt="链接"></p>
+<p>其中Library其实就是Runtime Library,也可以认为是一组目标文件的包</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/05/12/compile_process/" data-id="ck2dexrgs0001i0kiz3qpp16h" class="article-share-link">分享</a>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/compiler/">compiler</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+    
+<nav id="article-nav">
+  
+    <a href="/2018/05/12/makefile_introduction/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          makefile(1)入门
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/04/13/nfs_setting/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">NFS共享设置</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+ 
+     
+  <div class="comments" id="comments">
+    
+     
+       
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+       
+      
+      
+  </div>
+ 
+  
+
+</section>
+           
+    <aside id="sidebar">
+  
+    
+    <div class="widget-wrap">
+    
+      <div class="widget" id="toc-widget-fixed">
+      
+        <strong class="toc-title">文章目录</strong>
+        <div class="toc-widget-list">
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#预处理"><span class="toc-number">1.</span> <span class="toc-text">预处理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#编译"><span class="toc-number">2.</span> <span class="toc-text">编译</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#汇编"><span class="toc-number">3.</span> <span class="toc-text">汇编</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#链接"><span class="toc-number">4.</span> <span class="toc-text">链接</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么需要链接"><span class="toc-number">4.1.</span> <span class="toc-text">为什么需要链接</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-词法分析"><span class="toc-number">4.1.1.</span> <span class="toc-text">1. 词法分析:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-语法分析"><span class="toc-number">4.1.2.</span> <span class="toc-text">2. 语法分析:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-语义分析"><span class="toc-number">4.1.3.</span> <span class="toc-text">3. 语义分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-中间语言生成"><span class="toc-number">4.1.4.</span> <span class="toc-text">4. 中间语言生成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-目标代码的生成和优化"><span class="toc-number">4.1.5.</span> <span class="toc-text">5. 目标代码的生成和优化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#6-总结"><span class="toc-number">4.1.6.</span> <span class="toc-text">6. 总结</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#链接做了什么什么"><span class="toc-number">4.2.</span> <span class="toc-text">链接做了什么什么</span></a></li></ol></li></ol>
+          </div>
+      </div>
+    </div>
+
+  
+    
+
+  
+    
+  
+    
+
+  
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-left">
+      &copy; 2014 - 2019 hejianglin&nbsp;|&nbsp;
+      主题 <a href="https://github.com/giscafer/hexo-theme-cafe/" target="_blank">Cafe</a>
+    </div>
+     <div id="footer-right">
+      联系方式&nbsp;|&nbsp;he.jianglin@foxmail.com
+    </div>
+  </div>
+</footer>
+ <script src="/jquery/jquery.min.js"></script>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">关于</a>
+  
+</nav>
+    <img class="back-to-top-btn" src="/images/fly-to-top.png"/>
+<script>
+// Elevator script included on the page, already.
+window.onload = function() {
+  var elevator = new Elevator({
+    selector:'.back-to-top-btn',
+    element: document.querySelector('.back-to-top-btn'),
+    duration: 1000 // milliseconds
+  });
+}
+</script>
+      
+
+  
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "e2fb4051c49842688ce669e634bc983f",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+    
+
+  
+
+
+
+
+
+
+
+<!-- author:forvoid begin -->
+<!-- author:forvoid begin -->
+
+<!-- author:forvoid end -->
+
+<!-- author:forvoid end -->
+
+
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      })
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      })
+    </script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/mathjax/MathJax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+ <script src="/js/is.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+<script src="/js/elevator.js"></script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>extern "C"</title>
+    <url>/2019/06/26/extern_c/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>很常见的一个东西,有时候会记反相应的顺序,记录一下</p>
+<h2 id="extern-“C”"><a href="#extern-“C”" class="headerlink" title="extern “C”"></a>extern “C”</h2><p>首先来 C 语言下,这个 main.c 的编译情况:<br><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> a = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">fun</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> k = a;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>查看符号表<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">gcc -o main_c main.c</span><br><span class="line">nm main_c</span><br></pre></td></tr></table></figure></p>
+<p>可以看到是这样的:<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">0000000100000000 T __mh_execute_header</span><br><span class="line">0000000100001000 S _a</span><br><span class="line">0000000100000f80 T _fun</span><br><span class="line">0000000100000f90 T _main</span><br><span class="line">                 U dyld_stub_binder</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h3 id="使用-g-呢"><a href="#使用-g-呢" class="headerlink" title="使用 g++ 呢?"></a>使用 g++ 呢?</h3><p>复制一份 main.c 的代码为 main.cpp,通过:<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">g++ -o main_cpp main.cpp</span><br><span class="line">nm main_cpp</span><br></pre></td></tr></table></figure></p>
+<p>可以看到符号表是这样:<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">0000000100000f80 T __Z3funv</span><br><span class="line">0000000100000000 T __mh_execute_header</span><br><span class="line">0000000100001000 S _a</span><br><span class="line">0000000100000f90 T _main</span><br><span class="line">                 U dyld_stub_binder</span><br></pre></td></tr></table></figure></p>
+<h3 id="extern-“C”-1"><a href="#extern-“C”-1" class="headerlink" title="extern “C”"></a>extern “C”</h3><p>为了兼容这样的情况(C 调用 C++ 的接口),修改 main.cpp 为下面的样子:<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus</span></span><br><span class="line"><span class="keyword">extern</span> <span class="string">"C"</span> &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> a = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">fun</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> k = a;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure></p>
+<p>重新编译并查看符号表:<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">0000000100000000 T __mh_execute_header</span><br><span class="line">0000000100001000 S _a</span><br><span class="line">0000000100000f80 T _fun</span><br><span class="line">0000000100000f90 T _main</span><br><span class="line">                 U dyld_stub_binder</span><br></pre></td></tr></table></figure></p>
+<p>可以看到上面的 fun 符号表和 C 的已经一样了。</p>
+<p>✿✿ヽ(°▽°)ノ✿</p>
+]]></content>
+      <categories>
+        <category>C/C++</category>
+      </categories>
+      <tags>
+        <tag>C</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>UTF8字符编码转换为字节编码</title>
+    <url>/2018/11/12/utf8StringToByteString/</url>
+    <content><![CDATA[<p>在上周碰到一个比较坑爹(有可能也是我后知后觉了 - -‘ （大雾..)的问题,来看下下面的文件吧:<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Encryption key:on</span><br><span class="line">ESSID:"\xE8\xA7\x86\xE6\x98\x93\xE7\x82\xB9\xE6\xAD\x8C\xE6\x9C\xBAK72_V2uqa  "</span><br><span class="line">...</span><br><span class="line">Encryption key:on</span><br><span class="line">ESSID:" \xE8\xB7\xAF\xE8\xBE\xB9\xE3\x80\x82 lhwfacl\xE4\xBB\x8E5gu"</span><br></pre></td></tr></table></figure></p>
+<p>其中<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;\xE8\xA7\x86\xE6\x98\x93\xE7\x82\xB9\xE6\xAD\x8C\xE6\x9C\xBAK72_V2uqa  &quot;</span><br></pre></td></tr></table></figure></p>
+<p>已经是UTF8编码了，不过你尝试读取文件然后直接进行转码就会发现死活转不过来，为什么？  </p>
+<a id="more"></a>
+<h2 id="字符和字节"><a href="#字符和字节" class="headerlink" title="字符和字节"></a>字符和字节</h2><p>这2个其实区别很明显,但在这里却坑了我很久。使用<a href="https://en.wikipedia.org/wiki/Hex_dump" target="_blank" rel="noopener">xxd</a>看下上面这段字符的编码吧：<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">00000140: 2020 2020 2020 2020 2020 456e 6372 7970            Encryp</span><br><span class="line">00000150: 7469 6f6e 206b 6579 3a6f 6e0a 2020 2020  tion key:on.</span><br><span class="line">00000160: 2020 2020 2020 2020 2020 2020 2020 2020</span><br><span class="line">00000170: 4553 5349 443a 225c 7845 385c 7841 375c  ESSID:"\xE8\xA7\</span><br><span class="line">00000180: 7838 365c 7845 365c 7839 385c 7839 335c  x86\xE6\x98\x93\</span><br><span class="line">00000190: 7845 375c 7838 325c 7842 395c 7845 365c  xE7\x82\xB9\xE6\</span><br><span class="line">000001a0: 7841 445c 7838 435c 7845 365c 7839 435c  xAD\x8C\xE6\x9C\</span><br><span class="line">000001b0: 7842 414b 3732 5f56 3275 7161 2020 220a  xBAK72_V2uqa  ".</span><br></pre></td></tr></table></figure></p>
+<p>是了，文件是按字符格式保存的，为什么没有直接转为UTF8格式呢，这个还是不要问我了(- -‘因为不支持啊),于是这么一串.<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\xE8\xA7\x86\xE6\x98\x93\xE7\x82\xB9\xE6\xAD\x8C\xE6\x9C\xBAK72_V2uqa</span><br></pre></td></tr></table></figure></p>
+<p>你保存到<a href="https://en.wikipedia.org/wiki/C%2B%2B_string_handling" target="_blank" rel="noopener">string</a>下其实就是表面上的东西:<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">char [0] = '\';</span><br><span class="line"><span class="keyword">char</span> [<span class="number">1</span>] = <span class="string">'x'</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>而不是你想要的:<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">char</span> [<span class="number">0</span>] = E8;</span><br><span class="line"><span class="keyword">char</span> [<span class="number">1</span>] = A7;</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<h2 id="转换一下"><a href="#转换一下" class="headerlink" title="转换一下"></a>转换一下</h2><p>既然知道这个,那么转换起来就很快了,流程大概是:  </p>
+<ol>
+<li>按字符串分割.  </li>
+<li>将字符转为字节格式. </li>
+<li>序列化字节.<br>代码如下:</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; readFile(<span class="built_in">string</span> <span class="keyword">const</span> &amp;file)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; strVector;</span><br><span class="line">    <span class="built_in">string</span> strLine;</span><br><span class="line">    <span class="keyword">if</span>(!file.empty())&#123;</span><br><span class="line">        <span class="function">fstream <span class="title">read</span><span class="params">(file)</span></span>;</span><br><span class="line">        <span class="keyword">while</span>(getline(read,strLine))&#123;</span><br><span class="line">            strVector.push_back(strLine);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> strVector;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; split(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> &amp;str,<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> &amp;pattern)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; resVec;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="string">""</span> == str)&#123;</span><br><span class="line">        <span class="keyword">return</span> resVec;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//方便截取最后一段数据</span></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> strs = str + pattern;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">size_t</span> pos = strs.find(pattern);</span><br><span class="line">    <span class="keyword">size_t</span> size = strs.size();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (pos != <span class="built_in">std</span>::<span class="built_in">string</span>::npos)&#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">string</span> x = strs.substr(<span class="number">0</span>,pos);</span><br><span class="line">        resVec.push_back(x);</span><br><span class="line">        strs = strs.substr(pos+pattern.size(),size);</span><br><span class="line">        pos = strs.find(pattern);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> resVec;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">charToByte</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> s[],<span class="keyword">char</span> bits[])</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i,n = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(i = <span class="number">0</span>; s[i]; i += <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span>(s[i] &gt;= <span class="string">'A'</span> &amp;&amp; s[i] &lt;= <span class="string">'F'</span>)</span><br><span class="line">            bits[n] = s[i] - <span class="string">'A'</span> + <span class="number">10</span>;</span><br><span class="line">        <span class="keyword">else</span> bits[n] = s[i] - <span class="string">'0'</span>;</span><br><span class="line">        <span class="keyword">if</span>(s[i + <span class="number">1</span>] &gt;= <span class="string">'A'</span> &amp;&amp; s[i + <span class="number">1</span>] &lt;= <span class="string">'F'</span>)</span><br><span class="line">            bits[n] = (bits[n] &lt;&lt; <span class="number">4</span>) | (s[i + <span class="number">1</span>] - <span class="string">'A'</span> + <span class="number">10</span>);</span><br><span class="line">        <span class="keyword">else</span> bits[n] = (bits[n] &lt;&lt; <span class="number">4</span>) | (s[i + <span class="number">1</span>] - <span class="string">'0'</span>);</span><br><span class="line">        ++n;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span>, <span class="keyword">char</span> **)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//存放最后的结果</span></span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; result;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; fileContent = readFile(<span class="string">"./test"</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">unsigned</span> <span class="keyword">int</span> i = <span class="number">0</span>; i&lt; fileContent.size(); i++)&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//存放结果的临时数组</span></span><br><span class="line">        <span class="keyword">char</span> *temp = <span class="keyword">new</span> <span class="keyword">char</span>[fileContent.at(i).size() + <span class="number">1</span>];</span><br><span class="line">        <span class="built_in">memset</span>(temp,<span class="number">0</span>,fileContent.at(i).size() + <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//分割</span></span><br><span class="line">        <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; lineContent = split(fileContent.at(i),<span class="string">"\\x"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//如果小于 3 说明可能都是纯字符</span></span><br><span class="line">        <span class="keyword">if</span>(lineContent.size() &lt; <span class="number">3</span>)&#123;</span><br><span class="line">            result.push_back(fileContent.at(i));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//转换</span></span><br><span class="line">        <span class="keyword">int</span> k = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">unsigned</span> <span class="keyword">int</span> j = <span class="number">0</span>; j &lt; lineContent.size(); j++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(lineContent.at(j) == <span class="string">""</span>)&#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="built_in">string</span> strLess;</span><br><span class="line">            <span class="built_in">string</span> strChar = lineContent.at(j);</span><br><span class="line">            <span class="keyword">if</span>(strChar.size() &gt; <span class="number">2</span>)&#123;</span><br><span class="line">                strLess = strChar.substr(<span class="number">2</span>,strChar.size());</span><br><span class="line">                strChar = strChar.substr(<span class="number">0</span>,<span class="number">2</span>);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            charToByte(strChar.c_str(),temp + k);</span><br><span class="line">            k++;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(!strLess.empty())&#123;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">unsigned</span> <span class="keyword">int</span> m = <span class="number">0</span>; m &lt; strLess.size(); m++)&#123;</span><br><span class="line">                    temp[k++] = strLess.at(m);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        result.push_back(<span class="built_in">string</span>(temp));</span><br><span class="line">        <span class="keyword">delete</span> []temp;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">unsigned</span> <span class="keyword">int</span> i = <span class="number">0</span>; i&lt; result.size(); i++)&#123;</span><br><span class="line">        <span class="built_in">cout</span>&lt;&lt;<span class="string">"result:"</span>&lt;&lt;result.at(i)&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>测试文件内容如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\xE8\xA7\x86\xE6\x98\x93\xE7\x82\xB9\xE6\xAD\x8C\xE6\x9C\xBAK72_V2uqa  </span><br><span class="line">\xE8\xB7\xAF\xE8\xBE\xB9\xE3\x80\x82 lhwfacl\xE4\xBB\x8E5gu</span><br></pre></td></tr></table></figure></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://blog.csdn.net/CosmopolitanMe/article/details/70879894" target="_blank" rel="noopener">读取文件</a></li>
+<li><a href="https://blog.csdn.net/xjw532881071/article/details/49154911" target="_blank" rel="noopener">截取字符串</a></li>
+<li><a href="https://blog.csdn.net/u012372584/article/details/78901478" target="_blank" rel="noopener">字符转换</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>encoding</category>
+      </categories>
+      <tags>
+        <tag>encoding</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>makefile(3)函数</title>
+    <url>/2018/05/27/makefile_function/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>学习make和makefile的主要目的是分析大型项目的源代码的关系,上一节我们讲述了makefile 中的变量,本节主要学习一下 makefile 中的函数,首先函数肯定可以分为几部分:</p>
+<ul>
+<li>内置函数</li>
+<li>用户自动义函数</li>
+<li>函数的调用</li>
+<li>..</li>
+</ul>
+<a id="more"></a>
+<h3 id="函数的语法"><a href="#函数的语法" class="headerlink" title="函数的语法"></a>函数的语法</h3><p>make 下所有函数都有如下形式:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$(function-name arg1[,arg2,arg3,..])</span><br></pre></td></tr></table></figure>
+<p>我们首先来看内置函数:</p>
+<h2 id="内置函数"><a href="#内置函数" class="headerlink" title="内置函数"></a>内置函数</h2><p>make 的内置函数可分类如下:</p>
+<h3 id="字符串函数"><a href="#字符串函数" class="headerlink" title="字符串函数"></a>字符串函数</h3><h4 id="filter-pattern-…-text"><a href="#filter-pattern-…-text" class="headerlink" title="$(filter pattern …,text)"></a>$(filter pattern …,text)</h4><p>pattern 中可以使用 % 来做通配符,值得注意的是: <strong>每个 pattern 只支持 1 个 % </strong>,比如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//makefile</span><br><span class="line">words := he the hen other the%</span><br><span class="line">get-word:</span><br><span class="line">	@echo he matches: $(filter he,$(words))</span><br><span class="line">	@echo th% matches: $(filter th%,$(words))</span><br><span class="line">	@echo %th% matches: $(filter %th%,$(words))</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//result</span><br><span class="line">he matches: he</span><br><span class="line">th% matches: the the%</span><br><span class="line">%th% matches: #最后一个不匹配,因为words中不存在以th%为结尾的单词</span><br></pre></td></tr></table></figure>
+<h4 id="filter-out-pattern-text"><a href="#filter-out-pattern-text" class="headerlink" title="$(filter-out pattern ..,text)"></a>$(filter-out pattern ..,text)</h4><p>filter-out同filter相反,比如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//makefile</span><br><span class="line">words := he the hen other the%</span><br><span class="line">get-word:</span><br><span class="line">	@echo %th% matches: $(filter %th%,$(words))</span><br><span class="line">	@echo %th% matches: $(filter-out %th%,$(words))</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//result</span><br><span class="line">%th% matches:</span><br><span class="line">%th% matches: he the hen other the%</span><br></pre></td></tr></table></figure>
+<h4 id="findstring-string…-text"><a href="#findstring-string…-text" class="headerlink" title="$(findstring string…,text)"></a>$(findstring string…,text)</h4><p>此函数所返回会的只是<strong>“搜索字符”</strong>而不是包含搜索字符的字符,另外<strong>不支持pattern</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">words := he the hen other the%</span><br><span class="line">get-word:</span><br><span class="line">	@echo %th% matches: $(findstring %th%,$(words))</span><br><span class="line">	@echo he matches: $(findstring he,$(words))</span><br><span class="line">	@echo he% matches: $(findstring he%,$(words))</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%th% matches:</span><br><span class="line">he matches: he</span><br><span class="line">he% matches: he%</span><br></pre></td></tr></table></figure>
+<h4 id="subst-search-string-replace-string-text"><a href="#subst-search-string-replace-string-text" class="headerlink" title="$(subst search-string,replace-string,text)"></a>$(subst search-string,replace-string,text)</h4><p>不具有通配符能力的搜索替换函数,最经常使用于替换文件名列表的扩展名,如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sources := fun.c foo.c</span><br><span class="line">objects := $(subst .c,.o,$(sources))</span><br><span class="line"></span><br><span class="line">target:</span><br><span class="line">	@echo $(objects)</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">fun.o foo.o</span><br></pre></td></tr></table></figure>
+<h4 id="patsubst-search-pattern-replace-pattern-text"><a href="#patsubst-search-pattern-replace-pattern-text" class="headerlink" title="$(patsubst search-pattern,replace-pattern,text)"></a>$(patsubst search-pattern,replace-pattern,text)</h4><p>具有通配符能力的替换功能,有几个注意点:</p>
+<ul>
+<li>此处的模式只可以包含一个 % 字符</li>
+<li>replace-pattern中的百分比符号会被替换成与符号相符的文字</li>
+<li>search-pattern必须和text的整个值进行匹配</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source := main.c</span><br><span class="line">object := $(patsubst %.c,%.o,$(source))</span><br><span class="line">target:</span><br><span class="line">	gcc -c $(source) -o $(object)</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">gcc -c main.c -o main.o</span><br></pre></td></tr></table></figure>
+<h3 id="单词函数"><a href="#单词函数" class="headerlink" title="单词函数"></a>单词函数</h3><h4 id="words-text"><a href="#words-text" class="headerlink" title="$(words text)"></a>$(words text)</h4><p>统计text中单词个数 ,按照”space(空格)”进行拆分</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CURRENT_PATH := $(subst /, ,$(PWD))</span><br><span class="line">words:</span><br><span class="line">	@echo current path $(PWD)</span><br><span class="line">	@echo current path has $(words $(CURRENT_PATH)) directories</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">current path /Users/hejianglin/study/makefile</span><br><span class="line">current path has 4 directories</span><br></pre></td></tr></table></figure>
+<h4 id="word-n-text"><a href="#word-n-text" class="headerlink" title="$(word n,text)"></a>$(word n,text)</h4><p>“space(空格)”进行拆分,返回 text 中的第 n 个单词,开始编号为 1,如果找不到相应的位置则返回空</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CURRENT_PATH := $(subst /, ,$(PWD))</span><br><span class="line">words:</span><br><span class="line">	@echo current path $(PWD)</span><br><span class="line">	@echo current path second word: $(word 2,$(CURRENT_PATH))</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">current path /Users/hejianglin/study/makefile</span><br><span class="line">current path second word: hejianglin</span><br></pre></td></tr></table></figure>
+<h4 id="wordlist-start-end-text"><a href="#wordlist-start-end-text" class="headerlink" title="$(wordlist start,end,text)"></a>$(wordlist start,end,text)</h4><p>“space(空格)”进行拆分,返回 text 中的第 start(含) 到 end(含) 的单词,开始编号为 1,如果找不到相应的位置则返回空</p>
+<h3 id="文件名函数"><a href="#文件名函数" class="headerlink" title="文件名函数"></a>文件名函数</h3><h4 id="wildcard-pattern"><a href="#wildcard-pattern" class="headerlink" title="$(wildcard pattern..)"></a>$(wildcard pattern..)</h4><p>文件列表</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source := $(wildcard src/*.c include/*.h)</span><br><span class="line"></span><br><span class="line">.PHONY: test</span><br><span class="line">test:</span><br><span class="line">	@echo $(source)</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">src/foo.c src/fun.c src/main.c include/foo.h include/fun.h</span><br></pre></td></tr></table></figure>
+<h4 id="dir-list…"><a href="#dir-list…" class="headerlink" title="$(dir list…)"></a>$(dir list…)</h4><p>目录列表</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source := $(wildcard src/*.c include/*.h)</span><br><span class="line"></span><br><span class="line">.PHONY: test</span><br><span class="line">test:</span><br><span class="line">	@echo $(dir $(source))</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">src/ src/ src/ include/ include/</span><br></pre></td></tr></table></figure>
+<h4 id="notdir-list"><a href="#notdir-list" class="headerlink" title="$(notdir list..)"></a>$(notdir list..)</h4><p>删除目录的文件列表</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source := $(wildcard src/*.c include/*.h)</span><br><span class="line"></span><br><span class="line">.PHONY: test</span><br><span class="line">test:</span><br><span class="line">	@echo $(notdir $(source))</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">foo.c fun.c main.c foo.h fun.h</span><br></pre></td></tr></table></figure>
+<h4 id="suffix-name…"><a href="#suffix-name…" class="headerlink" title="$(suffix name…)"></a>$(suffix name…)</h4><p>返回每个单词的后缀</p>
+<h4 id="basename-name…"><a href="#basename-name…" class="headerlink" title="$(basename name…)"></a>$(basename name…)</h4><p>suffix的反函数</p>
+<h4 id="addsuffix-suffix-name…"><a href="#addsuffix-suffix-name…" class="headerlink" title="$(addsuffix suffix, name…)"></a>$(addsuffix suffix, name…)</h4><p>添加后缀名称</p>
+<h4 id="addprefix-prefix-name…"><a href="#addprefix-prefix-name…" class="headerlink" title="$(addprefix prefix,name…)"></a>$(addprefix prefix,name…)</h4><p>addsuffix的反函数,添加前缀</p>
+<h4 id="join-prefix-list-suffix-list"><a href="#join-prefix-list-suffix-list" class="headerlink" title="$(join prefix-list,suffix-list)"></a>$(join prefix-list,suffix-list)</h4><p>连接字符,dir 和 notdir 的反函数</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source := $(wildcard src/*.c include/*.h)</span><br><span class="line">prefix_dir := $(dir $(source))</span><br><span class="line">suffix_file := $(notdir $(source))</span><br><span class="line">.PHONY: test</span><br><span class="line">test:</span><br><span class="line">	@echo join $(join $(prefix_dir),$(suffix_file))</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">join src/foo.c src/fun.c src/main.c include/foo.h include/fun.h</span><br></pre></td></tr></table></figure>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><h4 id="sort-list"><a href="#sort-list" class="headerlink" title="$(sort list)"></a>$(sort list)</h4><p>排序 list 并移除重复项,排序优先级: 数字 &gt; 字母,字母按照升序排序:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source := b c 1 2 d 0 c</span><br><span class="line">target:</span><br><span class="line">	@echo sort source: $(sort $(source))</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sort source: 0 1 2 b c d</span><br></pre></td></tr></table></figure>
+<h4 id="shell-command"><a href="#shell-command" class="headerlink" title="$(shell command)"></a>$(shell command)</h4><p>执行 shell 命令,输出的换行被替换成单一的空格符号,错误和状态都不会返回</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.PHONY: test</span><br><span class="line">CURRENT_DATE = $(shell date +%Y%m%d)</span><br><span class="line">test:</span><br><span class="line">	@echo $(CURRENT_DATE)</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">20180610</span><br></pre></td></tr></table></figure>
+<h2 id="流程控制"><a href="#流程控制" class="headerlink" title="流程控制"></a>流程控制</h2><h3 id="if"><a href="#if" class="headerlink" title="if"></a>if</h3><h4 id="if-condition-then-part-else-part"><a href="#if-condition-then-part-else-part" class="headerlink" title="$(if condition, then-part,else-part)"></a>$(if condition, then-part,else-part)</h4><p>只要 condition 返回不为空,则为 true 便会执行 then-part, 否则执行 else-part</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$(if $(filter $(MAKE_VERSION),3.79 3,80),,\</span><br><span class="line">			$(error requires makefile version -.))</span><br><span class="line"></span><br><span class="line">.PHONY: test</span><br><span class="line">test:</span><br><span class="line">	@echo join $(join $(prefix_dir),$(suffix_file))</span><br></pre></td></tr></table></figure>
+<p>结果为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">makefile:1: *** requires makefile version -..  Stop.</span><br></pre></td></tr></table></figure>
+<p>因为本机的 make 版本是 3.81</p>
+<h3 id="for-while"><a href="#for-while" class="headerlink" title="for/while"></a>for/while</h3><h4 id="foreach-variable-list-body"><a href="#foreach-variable-list-body" class="headerlink" title="$(foreach variable,list,body)"></a>$(foreach variable,list,body)</h4><p>==这个函数实在难以理解(用法…),跳过吧==</p>
+]]></content>
+      <categories>
+        <category>compiler</category>
+      </categories>
+      <tags>
+        <tag>compiler</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>makefile(2)变量和宏</title>
+    <url>/2018/05/26/makefile_var/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>make 包含 2 种语言: 第一种用来描述工作目标和必要条件的依赖关系, 第二种是用来进行文字替换的宏语言</p>
+</blockquote>
+<p>我们在上一节已经见过第一种语言(规则)的用法了,其中我们也定义了类似于:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">VPATH = ...</span><br><span class="line">vpath = ...</span><br><span class="line">CPPFLAG = ..</span><br></pre></td></tr></table></figure>
+<p>等变量的值,本节主要介绍一下 makefile 中变量的用法.</p>
+<a id="more"></a>
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><p>变量的存在是为了最大程度的复用</p>
+<h3 id="创建变量"><a href="#创建变量" class="headerlink" title="创建变量"></a>创建变量</h3><p>变量的来源可以有:</p>
+<ul>
+<li><p>文件 </p>
+</li>
+<li><p>命令行</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">make CFLAG=-g ...</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>环境变量 (优先级低且降低移植性)</p>
+</li>
+<li><p>自动创建</p>
+</li>
+</ul>
+<h3 id="一些规则"><a href="#一些规则" class="headerlink" title="一些规则"></a>一些规则</h3><blockquote>
+<p>仅记录自己需要注意的规则</p>
+</blockquote>
+<ul>
+<li><p>变量名称区分大小写</p>
+</li>
+<li><p>可以使用 “$(CC)” 或者  “\${CC}” 的方式使用变量</p>
+</li>
+<li><p>一个变量的值由赋值符号右边已删除前导空格的所有字符组成,因此有一种情况需要注意:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">library = libutils.a #注意libutil.a后面多了一个空格</span><br></pre></td></tr></table></figure>
+<p>此时如果的变量”library”的值为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">libutils.a #同样包含这个空格</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="类型"><a href="#类型" class="headerlink" title="类型"></a>类型</h3><p>make 的变量有2种类型:</p>
+<ul>
+<li><p>简单扩展的变量</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//使用 := 赋值运算符来定义</span><br><span class="line">MAKE_DEPEND := $(CC) -M</span><br></pre></td></tr></table></figure>
+<p>扩展的原则：</p>
+<blockquote>
+<p>一旦make从makefile读进该变量的定义语句,赋值运算符的右边部分会立刻被扩展,而扩展后的文本会被存储为该变量的值</p>
+</blockquote>
+<p><strong>注意: 如果需要拓展的内容为空,则相应的值被拓展后为<space>(空格)</space></strong></p>
+<p>比如,上面的额CC如果未定义,则遇到扩展后将变为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MAKE_DEPEND =  -M</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>递归扩展的变量</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//使用 = 赋值运算符来定义</span><br><span class="line">MAKE_DEPEND = $(CC) -M</span><br></pre></td></tr></table></figure>
+<p>扩展的原则:</p>
+<blockquote>
+<p>扩展的动作会被延迟到该变量被使用的时候才进行</p>
+</blockquote>
+<p>比如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MAKE_DEPEND = $(CC) -M</span><br><span class="line">//第一次使用MAKE_DEPEND但是却没有的定义CC,则:</span><br><span class="line">MAKE_DEPEND = -M</span><br><span class="line">//定义 CC</span><br><span class="line">CC = gcc</span><br><span class="line">//第二次使用MAKE_DEPEND:</span><br><span class="line">MAKE_DEPEND = gcc -M</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="其他的赋值方式"><a href="#其他的赋值方式" class="headerlink" title="其他的赋值方式"></a>其他的赋值方式</h3><p>上面说使用了 := 来创建简单变量,使用 = 来创建递归变量,另外make还提供了 ?= 和 +=.</p>
+<h4 id="赋值方式"><a href="#赋值方式" class="headerlink" title="赋值方式 ?="></a>赋值方式 ?=</h4><blockquote>
+<p>？= 运算符成为附带条件的变量赋值运算符</p>
+</blockquote>
+<p>条件 ?  是什么条件 ? </p>
+<p>?= 用于首次定义,仅在变量的值不存在时对他进行赋值</p>
+<h4 id="赋值方式-1"><a href="#赋值方式-1" class="headerlink" title="赋值方式 +="></a>赋值方式 +=</h4><blockquote>
+<p>+= 附加运算符</p>
+</blockquote>
+<p>即附加相应的字符到变量</p>
+<h2 id="宏"><a href="#宏" class="headerlink" title="宏"></a>宏</h2><blockquote>
+<p>变量适合用来存储单行形式的值,可是对于多行形式值,比如脚本命令(函数),却表现得比较尴尬,因此宏就是来做这个事的</p>
+</blockquote>
+<p><strong>⚠️: 宏只是用来定义变量的另外一种方式</strong></p>
+<h3 id="创建宏"><a href="#创建宏" class="headerlink" title="创建宏"></a>创建宏</h3><p>在GNU make 中,可以通过define来创建宏(macro),比如,你可以这么使用:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">define update_dir</span><br><span class="line">	@echo update dir $@... #echo 前置的@不会输出echo命令,只会使用echo输出,更多的意义在后面学习</span><br><span class="line">	# do something</span><br><span class="line">endef #必须独自成一行</span><br></pre></td></tr></table></figure>
+<h3 id="使用宏"><a href="#使用宏" class="headerlink" title="使用宏"></a>使用宏</h3><p>宏的使用和变量并没有什么区别,比如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$(target) : $(condition1)  ...</span><br><span class="line">	$(update_dir) #对应上面创建的宏</span><br></pre></td></tr></table></figure>
+<p>比如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">BIN 	:= /usr/bin</span><br><span class="line">PRINTF 	:= $(BIN)/printf</span><br><span class="line">DF		:= /bin/df -h</span><br><span class="line">AWK 	:= $(BIN)/awk</span><br><span class="line"></span><br><span class="line">define _free_space</span><br><span class="line">	$(PRINTF) &quot;disk space statu:\n&quot;</span><br><span class="line">	$(DF) . | $(AWK) &apos;NR == 2 &#123;print $4&#125;&apos;</span><br><span class="line">endef</span><br><span class="line"></span><br><span class="line">.PHONY: free_space</span><br><span class="line">free_space:</span><br><span class="line">	@$(_free_space) #不输出执行的命令行,只输出结果</span><br></pre></td></tr></table></figure>
+<h2 id="目标专属变量"><a href="#目标专属变量" class="headerlink" title="目标专属变量"></a>目标专属变量</h2><p>为了为特定目标添加特定的变量,可以使用如下方式:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">gui.o: CPPFLAG += -DUSE_NEW_MALLOC=1</span><br><span class="line">gui.o: gui.h</span><br><span class="line">	$(COMPILE.c) $(OUTPUT_OPTION) $&lt;</span><br></pre></td></tr></table></figure>
+<p>当编译完成 “gui.o” 后 CPPFLAG 将会恢复原来的值</p>
+<h2 id="条件指令"><a href="#条件指令" class="headerlink" title="条件指令"></a>条件指令</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>类似于 C  的 “#ifdef” ,在 make 中使用下面的方式定义:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ifdef COMSPEC #变量不需要使用$()等方式引用</span><br><span class="line">	PATH_SEP := ;</span><br><span class="line">	EXE_EXT := .exe</span><br><span class="line">else</span><br><span class="line">	PATH_SEP := :</span><br><span class="line">	EXE_EXT :=</span><br><span class="line">endif</span><br></pre></td></tr></table></figure>
+<p>恩,和 C 的 #ifdef 一模一样,更多条件可以是这样:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ifdef var</span><br><span class="line">ifndef var</span><br><span class="line">ifeq test</span><br><span class="line">ifneq test</span><br></pre></td></tr></table></figure>
+<p>其中 ifeq 和 ifneq 中的 test 可以采用下面的方式:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//1</span><br><span class="line">&quot;condition1&quot; &quot;codition2&quot;</span><br><span class="line">//2</span><br><span class="line">(condition1,condition2)</span><br></pre></td></tr></table></figure>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><blockquote>
+<p>条件处理指令可以用在宏定义和命令脚本中,还可以放在makefile的顶层</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">libGui.a: $(condition)</span><br><span class="line">	$(AR) $(ARFLAGS) $@ $&lt;</span><br><span class="line">	ifdef RANLIB</span><br><span class="line">		$(RANLIB) $@</span><br><span class="line">	endif</span><br></pre></td></tr></table></figure>
+<h2 id="include-指令"><a href="#include-指令" class="headerlink" title="include 指令"></a>include 指令</h2><p>可以包含自身,可能很有用? 下面是一个无限引用自身的写法:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.PHONY: dummy</span><br><span class="line">makefile: dummy</span><br><span class="line">	touch $@</span><br></pre></td></tr></table></figure>
+<h2 id="标准的make变量"><a href="#标准的make变量" class="headerlink" title="标准的make变量"></a>标准的make变量</h2><p>看图即可：</p>
+<p><img src="http://oqnmphc00.bkt.clouddn.com/18-5-27/22941651.jpg" alt="标准make变量"></p>
+]]></content>
+      <categories>
+        <category>compiler</category>
+      </categories>
+      <tags>
+        <tag>compiler</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>makefile(1)入门</title>
+    <url>/2018/05/12/makefile_introduction/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近准备学习一下 Linux 驱动开发,发现自己对 makefile 已经忘的差不多了,索性花点时间重新学习一下,顺便记录一下,个人选择的书籍是:<a href="https://book.douban.com/subject/1845284/" target="_blank" rel="noopener">GNU Make 项目管理</a></p>
+<a id="more"></a>
+<h2 id="make-和-makefile"><a href="#make-和-makefile" class="headerlink" title="make 和 makefile"></a>make 和 makefile</h2><p>关于 make 和 makefile 的关系可以直接参考<a href="https://baike.baidu.com/item/make/17067703?fr=aladdin" target="_blank" rel="noopener">这里</a></p>
+<p>简言之: makefile 记录各个源代码之间关系及描述详细的编译过程,make 通过读取 makefile, 按照 makefile 描述编译过程进行自动化编译.</p>
+<p>问:那么 makefile 如何编写,make 又是怎么处理makefile的呢？</p>
+<p>答:makefile 包含了一组用来编译应用程序的规则,<strong>make 所看到的第一项规则会被视为默认规则</strong></p>
+<p>那么规则长什么样子?</p>
+<h2 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h2><p>一项规则可分为 3 个部分 : 1.target 2.prerequisite(前提条件) 3.command</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">target: prerequisite1  prerequisite2</span><br><span class="line">	commands</span><br></pre></td></tr></table></figure>
+<p>比如:</p>
+<h3 id="单个规则"><a href="#单个规则" class="headerlink" title="单个规则"></a>单个规则</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//single-target-makefile</span><br><span class="line">hello : hello.c</span><br><span class="line">	gcc hello.c -o hello</span><br></pre></td></tr></table></figure>
+<p>此时执行 make 则采用 target 默认采用 hello</p>
+<h3 id="多个规则"><a href="#多个规则" class="headerlink" title="多个规则"></a>多个规则</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//multi-target-makefile</span><br><span class="line">count_words: count_words.o lexer.o -lfl //default target</span><br><span class="line">	gcc count_words.o lexer.o -lfl -o count_words</span><br><span class="line"></span><br><span class="line">count_words.o: count_words.c //other-tager 1</span><br><span class="line">	gcc -c count_words.c</span><br><span class="line">	</span><br><span class="line">lexer.o: lexer.c //other-target 2</span><br><span class="line">	gcc -c lexer.c</span><br><span class="line"></span><br><span class="line">lexer.c: lexer.l //other-target 3 deplay</span><br><span class="line">	flex -t lexer.l &gt; lexer.c</span><br></pre></td></tr></table></figure>
+<p>关于编译过程的几个步骤可以参考<a href="https://hejianglin.github.io/2018/05/12/compile_process/" target="_blank" rel="noopener">这里</a></p>
+<p>此时执行make可以有 4 种选项:</p>
+<ul>
+<li>make count_words (<strong>默认规则</strong>)</li>
+<li>make count_words.o</li>
+<li>make lexer.o</li>
+<li>make lexer.c</li>
+</ul>
+<p>实际上执行<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">make (count_words)</span><br></pre></td></tr></table></figure></p>
+<p>的时候 make 会根据 count_words所需要的依赖关系逐一的编译<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">make lexer.c make lexer.o make count_words.o</span><br></pre></td></tr></table></figure></p>
+<h2 id="假-PHONY-的工作目标"><a href="#假-PHONY-的工作目标" class="headerlink" title="假(PHONY)的工作目标"></a>假(PHONY)的工作目标</h2><h3 id="clear"><a href="#clear" class="headerlink" title="clear"></a>clear</h3><p>.PHONY 用来告诉make,该target不是一个真正的文件.一般用于clear比如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.PHONY: clear</span><br><span class="line">clear:</span><br><span class="line">	rm -rf *.o</span><br></pre></td></tr></table></figure>
+<p>原因: make 无法区分target 是不是一个真正的文件,比如此处的clear文件和clear命令</p>
+<h3 id="all"><a href="#all" class="headerlink" title="all"></a>all</h3><p>同样的应用可以见:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.PHONY: all</span><br><span class="line">all: target1 target2</span><br></pre></td></tr></table></figure>
+<p>如此便可以一次编译多个不相互依赖的target </p>
+<h3 id="多次使用"><a href="#多次使用" class="headerlink" title="多次使用"></a>多次使用</h3><p>在编写makefile的时候可能需要命令行的可移植性,比如下面</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.PHONY: check_current_path_space</span><br><span class="line">check_current_path_space:</span><br><span class="line">	df -k . | awk &apos;NR==2 &#123;print $4&#125;&apos;</span><br></pre></td></tr></table></figure>
+<p>为了多次使用<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">df -k . | awk &apos;NR==2 &#123;print $4&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以多添加一个中间层:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.PHONY: check_current_path_space</span><br><span class="line">check_current_path_space: df</span><br><span class="line"></span><br><span class="line">.PHONY: df</span><br><span class="line">df:</span><br><span class="line">	df -k . | awk &apos;NR==2 &#123;print $4&#125;&apos;</span><br></pre></td></tr></table></figure>
+<h3 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h3><p><strong>这一步看的不是很懂,设置为TODO吧</strong></p>
+<h3 id="空目标-empty-target"><a href="#空目标-empty-target" class="headerlink" title="空目标(empty target)"></a>空目标(empty target)</h3><p><strong>同样没看的明白,TODO</strong></p>
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><p>为了提高利用率,makefile 提供变量的使用,最简单的变量形式: </p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$(var)//等同于 $&#123;var&#125;</span><br></pre></td></tr></table></figure>
+<p>make 在 makefile 中设定了几个自动变量</p>
+<h3 id="make-设定的自动变量"><a href="#make-设定的自动变量" class="headerlink" title="make 设定的自动变量"></a>make 设定的自动变量</h3><table>
+<thead>
+<tr>
+<th>变量</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$@</td>
+<td>工作目标的文件名</td>
+</tr>
+<tr>
+<td>$%</td>
+<td>Archive member结构中的文件名</td>
+</tr>
+<tr>
+<td>$&lt;</td>
+<td>第一个必要条件的文件名</td>
+</tr>
+<tr>
+<td>$?</td>
+<td>所有必要条件的文件名(时间戳在上次更新之后的文件)</td>
+</tr>
+<tr>
+<td>$^</td>
+<td>所有必要条件的文件名(去除重复的文件)</td>
+</tr>
+<tr>
+<td>$+</td>
+<td>所有必要条件的文件名(未去除重复的文件)</td>
+</tr>
+<tr>
+<td>$i*</td>
+<td>工作目标的主文件名(后文介绍)</td>
+</tr>
+</tbody>
+</table>
+<p>下面是一下相应的测试:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#$&lt; 第一个必要条件的文件名</span><br><span class="line">hello: hello.c</span><br><span class="line">	gcc -o $@ $&lt;</span><br><span class="line">#$? 和 $^</span><br><span class="line">sum: sum.c sum_fun.o</span><br><span class="line">	gcc -o $@ $^ # $?</span><br><span class="line"></span><br><span class="line">sum_fun.o: sum_fun.c</span><br><span class="line">	gcc -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm hello</span><br><span class="line"></span><br><span class="line">.PHONY: clean_sum</span><br><span class="line">clean_sum:</span><br><span class="line">	rm sum sum_fun.o</span><br></pre></td></tr></table></figure>
+<h2 id="多级目录"><a href="#多级目录" class="headerlink" title="多级目录"></a>多级目录</h2><p>平时我们遇到的 make 更多的情况可能是这种目录结构:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">├── include</span><br><span class="line">│   ├── foo.h</span><br><span class="line">│   └── fun.h</span><br><span class="line">├── makefile</span><br><span class="line">└── src</span><br><span class="line">    ├── foo.c</span><br><span class="line">    ├── fun.c</span><br><span class="line">    └── main.cpp</span><br></pre></td></tr></table></figure>
+<p>结合前面的学习,我们可能会写出这样的 makefile:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">test: src/main.c fun.o foo.o</span><br><span class="line">	gcc -o $@ $^</span><br><span class="line"></span><br><span class="line">fun.o: src/fun.c include/fun.h</span><br><span class="line">	gcc -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">foo.o: src/foo.c include/foo.h </span><br><span class="line">	gcc -c $&lt; -o $@</span><br></pre></td></tr></table></figure>
+<p>不过这样的编译结果是:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">make: *** No rule to make target `src/main.c&apos;, needed by `test&apos;.  Stop.</span><br></pre></td></tr></table></figure>
+<p>看样子 make 只会把 “src/main.c” 整个当成一个文件,因此此处引出了一个变量:</p>
+<blockquote>
+<p>VPATH : 告诉 make 到不同的目录去查找源文件</p>
+</blockquote>
+<p>上面的 makefile 利用 VPATH 修改成这样:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">VPATH = src</span><br><span class="line">test:  fun.o foo.o main.c</span><br><span class="line">	gcc -o $@ $^</span><br><span class="line"></span><br><span class="line">fun.o: fun.c include/fun.h</span><br><span class="line">	gcc -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">foo.o: foo.c include/foo.h</span><br><span class="line">	gcc -c $&lt; -o $@</span><br></pre></td></tr></table></figure>
+<p>然而这回确是找不到 include 的了:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">gcc -c src/fun.c -o fun.o</span><br><span class="line">src/fun.c:1:10: fatal error: &apos;fun.h&apos; file not found</span><br><span class="line">#include &quot;fun.h&quot;</span><br><span class="line">         ^~~~~~~</span><br><span class="line">1 error generated.</span><br><span class="line">make: *** [fun.o] Error 1</span><br></pre></td></tr></table></figure>
+<p>这大概是因为我们在 “fun.c” 中 include 了 “fun.h” ，为了解决这个问题编译器的 “-I” 选项可以帮助我们:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">VPATH = src</span><br><span class="line">CPPFLAGS = -I include</span><br><span class="line">test:  fun.o foo.o main.c</span><br><span class="line">	gcc $(CPPFLAGS) -o $@ $^</span><br><span class="line"></span><br><span class="line">fun.o: fun.c include/fun.h</span><br><span class="line">	gcc $(CPPFLAGS) -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">foo.o: foo.c include/foo.h</span><br><span class="line">	gcc $(CPPFLAGS) -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm fun.o foo.o test</span><br></pre></td></tr></table></figure>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><p>上面的 “<em>.o” 的头文件还是包含 “include/</em>.h”</p>
+<p>虽然 VPATH 变量可以解决搜索问题,不过如果你设置了 VPATH,那么 <strong>make 将会为它所需要的任何文件搜索 VPATH 列表中的每个目录,如果在多个目录中出现同名文件,那么 make 只会获取第一个被找到的文件</strong></p>
+<h3 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h3><p>使用 vpath ,这个指令的语法:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vpath pattern directory-list</span><br></pre></td></tr></table></figure>
+<p>上面的例子的 makefile 可以修改为:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vpath %.c src</span><br><span class="line">vpath %.h include</span><br><span class="line"></span><br><span class="line">CPPFLAGS = -I include</span><br><span class="line"></span><br><span class="line">test:  fun.o foo.o main.c</span><br><span class="line">	gcc $(CPPFLAGS) -o $@ $^</span><br><span class="line"></span><br><span class="line">fun.o: fun.c fun.h</span><br><span class="line">	gcc $(CPPFLAGS) -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">foo.o: foo.c foo.h</span><br><span class="line">	gcc $(CPPFLAGS) -c $&lt; -o $@</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm fun.o foo.o test</span><br></pre></td></tr></table></figure>
+<h2 id="内置规则"><a href="#内置规则" class="headerlink" title="内置规则"></a>内置规则</h2><p>为了简化 makefile 的编写工作, make 内置了许多模式规则而内置规则(built-in rule)是模式规则(pattern rule)的实例。若要查看make 的内置规则可以通过</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">make --print-data-base</span><br></pre></td></tr></table></figure>
+<p>查看,在我的环境下可以看到</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># Implicit Rules</span><br><span class="line"></span><br><span class="line">%.out:</span><br><span class="line"></span><br><span class="line">%.a:</span><br><span class="line"></span><br><span class="line">%.ln:</span><br><span class="line"></span><br><span class="line">%.o:</span><br><span class="line"></span><br><span class="line">%: %.o</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@</span><br><span class="line"></span><br><span class="line">%.c:</span><br><span class="line"></span><br><span class="line">%: %.c</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(LINK.c) $^ $(LOADLIBES) $(LDLIBS) -o $@</span><br><span class="line"></span><br><span class="line">%.ln: %.c</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(LINT.c) -C$* $&lt;</span><br><span class="line"></span><br><span class="line">%.o: %.c</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(COMPILE.c) $(OUTPUT_OPTION) $&lt;</span><br><span class="line"></span><br><span class="line">%.cc:</span><br><span class="line"></span><br><span class="line">%: %.cc</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@</span><br><span class="line"></span><br><span class="line">%.o: %.cc</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(COMPILE.cc) $(OUTPUT_OPTION) $&lt;</span><br><span class="line"></span><br><span class="line">%.C:</span><br><span class="line"></span><br><span class="line">%: %.C</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(LINK.C) $^ $(LOADLIBES) $(LDLIBS) -o $@</span><br><span class="line"></span><br><span class="line">%.o: %.C</span><br><span class="line">#  commands to execute (built-in):</span><br><span class="line">	$(COMPILE.C) $(OUTPUT_OPTION) $&lt;</span><br><span class="line"></span><br><span class="line">//...</span><br></pre></td></tr></table></figure>
+<p>根据上面的描述,再来精简一下原来的makefile:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vpath %.c src</span><br><span class="line">vpath %.h include</span><br><span class="line"></span><br><span class="line">CPPFLAGS = -I include</span><br><span class="line"></span><br><span class="line">test:  fun.o foo.o main.c</span><br><span class="line">	gcc $(CPPFLAGS) -o $@ $^ #因为包含%.o 与 %.c 的结合,因此只能自己编写编译规则</span><br><span class="line">fun.o: fun.c fun.h</span><br><span class="line">foo.o: foo.c foo.h</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm fun.o foo.o test</span><br></pre></td></tr></table></figure>
+<h3 id="修改规则变量的建议"><a href="#修改规则变量的建议" class="headerlink" title="修改规则变量的建议"></a>修改规则变量的建议</h3><blockquote>
+<p>CFLAGS: 编译选项的变量<br>CPPFLAGS: 预处理的变量<br>TARGET_ARCH:  结构 选项</p>
+</blockquote>
+<p>如果需要更新相应规则的变量值,建议使用<strong>非系统默认</strong>的变量名称,比如:</p>
+<p>在原 make 中存在 CPPFLAGS 变量为(可通过 “make -p” 查看):</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CPPFLAGS = -I includes</span><br></pre></td></tr></table></figure>
+<p>而此时你需要在添加一个搜索头文件的目录,<strong>建议这么修改:</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">INCLUDES = -I your_includes</span><br></pre></td></tr></table></figure>
+<p>然后在相应 makefile 中这么写:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">gcc $(CPPFLAGS) $(INCLUDES) ...</span><br></pre></td></tr></table></figure>
+<h2 id="静态库"><a href="#静态库" class="headerlink" title="静态库"></a>静态库</h2><p>我们可以通过命令 “ar” 生成一个静态库, 关于 ar 可以查看 man,此处重点描述一下静态库在 makefile 中的更新</p>
+<h3 id="生成"><a href="#生成" class="headerlink" title="生成"></a>生成</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vpath %.c src</span><br><span class="line">vpath %.h include</span><br><span class="line"></span><br><span class="line">CPPFLAGS = -I include</span><br><span class="line"></span><br><span class="line">test:  main.c libmyutil.a</span><br><span class="line">	gcc $(CPPFLAGS) -o $@ $^</span><br><span class="line"></span><br><span class="line">libmyutil.a: fun.o foo.o</span><br><span class="line">	ar rv libmyutil.a $^</span><br><span class="line"></span><br><span class="line">.INTERMEDIATE: fun.o foo.o</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm test libmyutil.a</span><br></pre></td></tr></table></figure>
+<p>.INTERMEDIATE 和 .PHONY 的类型一样,属于 makefile 中的特殊工作目标,它的作用是设定编译过程的中间文件,如果 make 在更新另一个工作目标期间创建了该文件,则该文件将在 make 运行结束时被自动删除,若在更新之前已存在则不删除.此处删除 fun.o 和 foo.o 文件,因为他们已经被打包到 libmyutil.a 中.</p>
+<p>可以看一下 make 的执行流程(使用 “make –just-print” 可 查看过程却不执行):</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cc  -I include  -c -o fun.o src/fun.c</span><br><span class="line">cc  -I include  -c -o foo.o src/foo.c</span><br><span class="line">ar rv libmyutil.a fun.o foo.o</span><br><span class="line">gcc -I include -o test src/main.c libmyutil.a</span><br><span class="line">rm fun.o foo.o</span><br></pre></td></tr></table></figure>
+<h3 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h3><p>按照上面的 makefile,此时如果 foo.c 或者 fun.c <strong>其中一个</strong>发生了改变,那 make 都会尝试重新编译他们,怎样做到只编译更新是此处要解决的问题.</p>
+<h4 id="library-o"><a href="#library-o" class="headerlink" title="library(%.o)"></a>library(%.o)</h4><p>对需要打包的模块进行分别描述可以解决上面那个问题,比如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vpath %.c src</span><br><span class="line">vpath %.h include</span><br><span class="line"></span><br><span class="line">CPPFLAGS = -I include</span><br><span class="line"></span><br><span class="line">test:  main.c libmyutil.a</span><br><span class="line">	gcc $(CPPFLAGS) -o $@ $^</span><br><span class="line"></span><br><span class="line">libmyutil.a: libmyutil.a(fun.o) libmyutil.a(foo.o)</span><br><span class="line">	ar rv libmyutil.a $?</span><br><span class="line"></span><br><span class="line">.INTERMEDIATE: fun.o foo.o</span><br><span class="line"></span><br><span class="line">.PHONY: clean</span><br><span class="line">clean:</span><br><span class="line">	rm test libmyutil.a</span><br></pre></td></tr></table></figure>
+<p>如果只是更新了 foo.c 则编译过程可能如下:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cc  -I include  -c -o foo.o src/foo.c</span><br><span class="line">ar rv libmyutil.a foo.o</span><br><span class="line">r - foo.o</span><br><span class="line">ar rv libmyutil.a foo.o</span><br><span class="line">r - foo.o</span><br><span class="line">gcc -I include -o test src/main.c libmyutil.a</span><br><span class="line">rm foo.o</span><br></pre></td></tr></table></figure>
+<h3 id="链接顺序"><a href="#链接顺序" class="headerlink" title="链接顺序"></a>链接顺序</h3><blockquote>
+<p>每项规则的必要条件会依照他们被看到的顺序被一次附加到该工作目标的必要条件列表中</p>
+</blockquote>
+<p>为了解决循环引用的问题(应避免这个问题才是吧),需要引入: “$?” 的使用,关于 “$?” 的使用可以查看上面关于变量的描述</p>
+]]></content>
+      <categories>
+        <category>compiler</category>
+      </categories>
+      <tags>
+        <tag>compiler</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>程序编译过程</title>
+    <url>/2018/05/12/compile_process/</url>
+    <content><![CDATA[<p>我们都知道build的4个过程</p>
+<ul>
+<li>预处理(prepressing)</li>
+<li>编译(compilation)</li>
+<li>汇编(assembly)</li>
+<li>链接(linking)</li>
+</ul>
+<p>我们以最简单’hello,world’来进行讲述这几个过程</p>
+<a id="more"></a>
+<h2 id="预处理"><a href="#预处理" class="headerlink" title="预处理"></a>预处理</h2><p>通过编译器生成预编译完成的.i文件</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ gcc -E hello.c hello.i</span><br></pre></td></tr></table></figure>
+<p>预处理最大的作用自然就是处理预编译指令,因此可以通过这样的方式看下我们的宏定义是否正确,其中:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 55 &quot;/usr/include/sys/_types.h&quot; 3 4</span><br></pre></td></tr></table></figure>
+<p>用于编译器产生调试用的行号信息及产生编译错误或警告时显示行号,关于这一个，有待后续研究</p>
+<h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><p><strong>编译的最终结果是为了将源代码生成汇编代码</strong> 可以通过’-S’来生成,比如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">gcc -S hello.i -o hello.s</span><br></pre></td></tr></table></figure>
+<h2 id="汇编"><a href="#汇编" class="headerlink" title="汇编"></a>汇编</h2><p><strong>汇编的最终结果是为了将汇编代码生成机器代码</strong>可以通过as或者’-C’得到目标文件,比如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">as hello.s -o hello.o</span><br></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">gcc -c hello.c -o hello.o</span><br></pre></td></tr></table></figure>
+<p>查看.o文件可以使用命令xxd</p>
+<h2 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h2><h3 id="为什么需要链接"><a href="#为什么需要链接" class="headerlink" title="为什么需要链接"></a>为什么需要链接</h3><p>讲述链接之前我们再研究一下为什么我们需要链接，下面是编译在编译源程序的具体工作流程: <img src="https://pic.superbed.cn/item/5db93135bd461d945a58a928.png" alt="编译器处理编译的详细过程"></p>
+<h4 id="1-词法分析"><a href="#1-词法分析" class="headerlink" title="1. 词法分析:"></a>1. 词法分析:</h4><p>通过类似有限状态机(你可以认为是if..else…)将代码中的字符分解成它所能理解的最小片(tokens)</p>
+<p><strong>代表工具:lex</strong></p>
+<h4 id="2-语法分析"><a href="#2-语法分析" class="headerlink" title="2. 语法分析:"></a>2. 语法分析:</h4><p>将代码解析成语法树(syntax tree)</p>
+<blockquote>
+<p>分析时各逻辑/算术符号将按优先级进行解析</p>
+</blockquote>
+<p><strong>代表工具:yacc</strong></p>
+<h4 id="3-语义分析"><a href="#3-语义分析" class="headerlink" title="3. 语义分析"></a>3. 语义分析</h4><p>代码中存在的语义存在两种类型</p>
+<ul>
+<li>静态语义(static semantic):包括声明和类型的匹配</li>
+<li>动态语义(dynamic semantic):运行期间的错误</li>
+</ul>
+<p>编译器只能进行静态语义的分析</p>
+<h4 id="4-中间语言生成"><a href="#4-中间语言生成" class="headerlink" title="4. 中间语言生成"></a>4. 中间语言生成</h4><p>编译器优化(前端) + 生成目标机器代码(后端)<br>区分前后端的原因在于:不同平台的机器代码不同,但优化的前端代码是一致的</p>
+<blockquote>
+<p>注:中间语言的生成只是包含编译器优化的代码,生成机器代码是步骤5</p>
+</blockquote>
+<h4 id="5-目标代码的生成和优化"><a href="#5-目标代码的生成和优化" class="headerlink" title="5. 目标代码的生成和优化"></a>5. 目标代码的生成和优化</h4><h4 id="6-总结"><a href="#6-总结" class="headerlink" title="6. 总结"></a>6. 总结</h4><p>经历了这些步骤之后，我们编生成了源代码的目标码？然而回想一下你的源码，如果是单文件源码，那我们自然知道变量的地址，如果非单文件我们又是如何确定变量的地址的?<br>此时就需要链接了!!!</p>
+<h3 id="链接做了什么什么"><a href="#链接做了什么什么" class="headerlink" title="链接做了什么什么"></a>链接做了什么什么</h3><p><strong>链接的最终目的是填各变量/函数的地址</strong><br>下图所示就是链接在编译过程所在的位置:</p>
+<p><img src="https://pic.superbed.cn/item/5db93167bd461d945a58ac53.png" alt="链接"></p>
+<p>其中Library其实就是Runtime Library,也可以认为是一组目标文件的包</p>
+]]></content>
+      <categories>
+        <category>compiler</category>
+      </categories>
+      <tags>
+        <tag>compiler</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>NFS共享设置</title>
+    <url>/2018/04/13/nfs_setting/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>为了避免每次从windows下载文件之后都要再手动拷贝到虚拟机下面，还是在这 2 个系统之间搭建一个共享机制吧（愁..</p>
+<a id="more"></a>
+<h2 id="环境说明"><a href="#环境说明" class="headerlink" title="环境说明"></a>环境说明</h2><ul>
+<li>虚拟机：ubuntu-12.04.5-i386</li>
+<li>Windows：Windows 7 旗舰版 32位</li>
+</ul>
+<h2 id="虚拟机设置"><a href="#虚拟机设置" class="headerlink" title="虚拟机设置"></a>虚拟机设置</h2><ul>
+<li><p>安装 nfs-server 和 nfs-comon</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo apt-get install nfs-kernel-server//会自动安装client即nfs-common</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置共享目录权限,比如:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">chmod 0777 -R /home/hejianglin/nfs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置 nfs 的共享目录</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo vim /etc/exports</span><br></pre></td></tr></table></figure>
+<p>在文件的最后添加下面一行</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/home/hejianglin/nfs *(rw,sync,no_subtree_check)</span><br></pre></td></tr></table></figure>
+<p>*及括号内的含义可以<a href="https://blog.csdn.net/sokril/article/details/78910100" target="_blank" rel="noopener">参考此处</a></p>
+</li>
+<li><p>重启 nfs</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo service nfs-kernel-server restart</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>重启 portmap</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo service portmap restart</span><br></pre></td></tr></table></figure>
+<p>关于 nfs 和 portmap 的关系可以<a href="https://www.centos.org/docs/5/html/Deployment_Guide-en-US/s2-nfs-methodology-portmap.html" target="_blank" rel="noopener">参考此处</a></p>
+</li>
+</ul>
+<h2 id="Window设置"><a href="#Window设置" class="headerlink" title="Window设置"></a>Window设置</h2><ul>
+<li><p>打开nfs功能</p>
+<p>通过<strong>打开或关闭Windows功能</strong>中的nfs服务</p>
+</li>
+</ul>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="Windows为Client-虚拟为Server"><a href="#Windows为Client-虚拟为Server" class="headerlink" title="Windows为Client,虚拟为Server"></a>Windows为Client,虚拟为Server</h3><p>打开 Windows 下面的 cmd,执行</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">//mount 虚拟机ip:虚拟机nfs路径 挂载磁盘:</span><br><span class="line">mount 192.168.2.200:/home/hejianglin/nfs K:</span><br></pre></td></tr></table></figure>
+<p>即可</p>
+<h3 id="Windows为Server-虚拟机为Client"><a href="#Windows为Server-虚拟机为Client" class="headerlink" title="Windows为Server,虚拟机为Client"></a>Windows为Server,虚拟机为Client</h3><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>✿✿ヽ(°▽°)ノ✿</p>
+]]></content>
+      <categories>
+        <category>config</category>
+      </categories>
+      <tags>
+        <tag>NFS</tag>
+      </tags>
+  </entry>
+</search>
