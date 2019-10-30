@@ -37,6 +37,8 @@ nm main_c
 0000000100000f90 T _main
                  U dyld_stub_binder
 ```
+
+<!--more-->
 ### 使用 g++ 呢?
 复制一份 main.c 的代码为 main.cpp,通过:
 ``` shell
