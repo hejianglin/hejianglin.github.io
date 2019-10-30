@@ -9,9 +9,9 @@ branches: # 指定要构建的分支
   - hexo
 
 before_install:
-  - git clone https://github.com/theme-next/hexo-theme-next.git themes/next
-  - rm themes/next/_config.yml
-  - cp themes/config/next/_config.yml themes/next/_config.yml
+  - git clone https://github.com/giscafer/hexo-theme-cafe.git themes/cafe
+  - rm themes/cafe/_config.yml
+  - cp themes/config/cafe/_config.yml themes/cafe/_config.yml
   
 install: # 在安装项目环境阶段需要运行的命令，一条一行，类似的还有 before_install
   - source travis_env_init.sh # 指定 shell 脚本文件来做初始化
